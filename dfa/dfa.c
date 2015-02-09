@@ -33,8 +33,9 @@ void State_destroy(struct State *state)
 
 void State_print(struct State *state)
 {
-	printf("%s, ZERO->%s, ONE->%s, START? %d, FINAL? %d\n", 
-          state->name, state->zero->name, state->one->name, state->start, state->final);
+	printf("%s, START? %d, FINAL? %d, ZERO-> %s, ONE-> %s\n", 
+          state->name, state->start, state->final, 
+          state->zero->name, state->one->name);
 }
 
 void States_destroy(struct State **states, int len)
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
 		}
 	} else if (argc == 3) {
 		if (!strcmp(argv[2], "-f")) {
-			printf("Argument error\n"); 
+			printf("If invoking -f argument, please supply a valid file name\n"); 
 			return -1;
 		}
 		input = argv[2];
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	// PARSE STATES FILE
+	// OPEN STATES FILE
 	FILE *lang = fopen(argv[1], "r");
 	if (lang == NULL) {
 		printf("Error opening %s\n", argv[1]);
@@ -82,8 +83,8 @@ int main(int argc, char *argv[])
 	}
 
 	// READ STATES FROM FILE
-	int size = 46;        // state NAME must contain ONLY two chars	
-	char s_name[size][3]; //
+	int size = 50;  // minimum 46	
+	char s_name[size][3]; // state NAME must contain at lesat two chars
 	int s_start[size], s_final[size], s_zero[size], s_one[size];
 
 	int i = 0;
@@ -105,7 +106,6 @@ int main(int argc, char *argv[])
 			exit(1);
 		} 
 	}
-	printf("INPUT: %s\n", input);
 	
 	// SET NUMBER OF STATES
 	int num_states = i;
@@ -149,7 +149,13 @@ int main(int argc, char *argv[])
 	for (i = 0; i < num_states; i++) {
 		states[i]->zero = states[s_zero[i]];
 		states[i]->one = states[s_one[i]];
+		
+		// Print states to console
+		State_print(states[i]);
 	}
+
+	// PRINT INPUT STRING
+	printf("INPUT: %s\n", input);
 
 	// RUN MACHINE
 	for(i = 0; input[i] != '\0'; i++) {
