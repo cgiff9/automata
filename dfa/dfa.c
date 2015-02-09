@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
                   s_name[i], 
                   &s_start[i], 
                   &s_final[i],
-						&s_zero[i],
-						&s_one[i],
+                  &s_zero[i],
+                  &s_one[i],
                   &pos) != 6 || pos != strlen(buff) - 1) 
 		{
 			fprintf(stderr, "Error parsing states format: <%s>\n", buff);
