@@ -42,6 +42,8 @@ from a supplied file and runs the automaton on
 a supplied input string. Automaton only works
 over the alphabet {0, 1}.
 
+Behavior for any other characters is not defined.
+
 --------------
    WARNING:
 --------------

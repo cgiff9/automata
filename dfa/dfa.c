@@ -15,7 +15,7 @@ const unsigned long state_name_max = 50;			// absolute minimum of 2 characters
 
 // input_string_max = the maximum number of bits (0,1) allowed for an input string
 // states_max = the maximum number of states allowed in a states file
-// state_name_max = the maximum number of characters (letters) for a state name
+// state_name_max = the maximum number of characters (ie. letters, numbers) for a state name
 
 // sleep function for slight pause on ACCEPTED strings
 int nsleep(long miliseconds)
