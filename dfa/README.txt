@@ -22,6 +22,13 @@ of the "tm.sh" script. But hey, who am I to remind
 the intelligent user of the need to read scripts
 before running them? ;P
 
+There is one more script which could be used by
+"tm.sh" called "genbits.sh" which creates strings
+with a potentially limited number of ones and a
+potentially massive number of zeroes. I'll let you
+figure out which states files such script may be
+useful for. ;)
+
 You are always free to write your own
 scripts to automate the creation of input strings
 and/or run the machine multiple times. 
