@@ -17,7 +17,8 @@ if [ "$SLEEP_INTERVAL" -eq 0 ]; then
 	while true; do 
 		$DFA \
 			$MACHINE_FILE \
-			-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[1-9]/1/g' | tr 01 10 )
+			-f <(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[a-zA-Z1-9]/1/g' | tr 01 10)
+			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[1-9]/1/g' | tr 01 10 )
 			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[1-7]/1/g' | tr 01 10 | sed 's/8/00/g' | sed 's/9/000/g')
 			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $(( RANDOM % INPUT_STR_LENGTH + 1)) | head -n 5 | sed 's/[1-9]/1/g' | tr 01 10)
 			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w ${INPUT_STR_LENGTH} | head -n 5 | sed 's/[1-9]/1/g' | tr 01 10)

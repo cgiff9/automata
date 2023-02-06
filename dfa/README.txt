@@ -56,7 +56,7 @@ certain special characters other than 0 and 1.
 If you are getting undefined behavior when running
 your states file, and you're certain of its correctness,
 please observe the top of the file "dfa.c" and adjust
-the three long values under the "MACHINE CONSTANTS"
+the three values defined under the "MACHINE CONSTANTS"
 comment. 
 
 Because this program was written in C, there are
