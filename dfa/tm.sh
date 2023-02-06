@@ -3,8 +3,8 @@
 PROG_DIR=/home/chuck/automata/dfa
 DFA=${PROG_DIR}/dfa
 #MACHINE_FILE="${PROG_DIR}/auto_divisibleByThree.txt"
-#MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_4th.txt"
-MACHINE_FILE="${PROG_DIR}/auto_acceptAll.txt"
+MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_4th.txt"
+#MACHINE_FILE="${PROG_DIR}/auto_acceptAll.txt"
 
 #INPUT_STR_CMD='$(echo "obase=2; $(od -vAn -N8 -tu8 < /dev/urandom)"|bc)'
 #INPUT_STR_CMD="'$(cat /dev/urandom | tr -dc '[:digit:]' | fold -w ${1:-30} | head -n 5 | sed 's/[1-9]/1/g' | tr 01 10)'"

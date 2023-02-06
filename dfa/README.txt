@@ -42,7 +42,13 @@ from a supplied file and runs the automaton on
 a supplied input string. Automaton only works
 over the alphabet {0, 1}.
 
-Behavior for any other characters is not defined.
+Every character other than zero is treated as a 1. 
+Because the input string is treated as an array of 
+characters, an input string containing the 
+sequence "\0" will be treated the same as the 
+sequence "10". Please be aware of your shell's
+quirks when supplying input strings that contain
+certain special characters other than 0 and 1.
 
 --------------
    WARNING:
@@ -60,6 +66,10 @@ source code. The current restrictions are:
 INPUT STRING NUMBER OF BITS:    10,000
 NUMBER OF STATES:               200
 STATE NAME CHARACTER LIMIT:     50
+
+Please keep in mind the INPUT_STRING_MAX definition
+only applies to input strings supplied by file with
+the '-f' directive, which is described further below.
 
 --------------
    RUNNING:
