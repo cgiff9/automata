@@ -57,9 +57,9 @@ Because this program was written in C, there are
 certain bounds that must be manually set in the
 source code. The current restrictions are:
 
-INPUT STRING NUMBER OF BITS:	10,000
-NUMBER OF STATES:				200
-STATE NAME CHARACTER LIMIT:		50
+INPUT STRING NUMBER OF BITS:    10,000
+NUMBER OF STATES:               200
+STATE NAME CHARACTER LIMIT:     50
 
 --------------
    RUNNING:
