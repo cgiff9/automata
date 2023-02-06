@@ -10,30 +10,30 @@
 
 int nsleep(long miliseconds)
 {
-	struct timespec req, rem;
+	   struct timespec req, rem;
 
-	if(miliseconds > 999)
-	{   
-		req.tv_sec = (int)(miliseconds / 1000);                            /* Must be Non-Negative */
-		req.tv_nsec = (miliseconds - ((long)req.tv_sec * 1000)) * 1000000; /* Must be in range of 0 to 999999999 */
-	}   
-	else
-	{   
-		req.tv_sec = 0;                         /* Must be Non-Negative */
-		req.tv_nsec = miliseconds * 1000000;    /* Must be in range of 0 to 999999999 */
-	}   
+	      if(miliseconds > 999)
+		         {   
+				         req.tv_sec = (int)(miliseconds / 1000);                            /* Must be Non-Negative */
+					         req.tv_nsec = (miliseconds - ((long)req.tv_sec * 1000)) * 1000000; /* Must be in range of 0 to 999999999 */
+						    }   
+	         else
+			    {   
+				            req.tv_sec = 0;                         /* Must be Non-Negative */
+					            req.tv_nsec = miliseconds * 1000000;    /* Must be in range of 0 to 999999999 */
+						       }   
 
-	return nanosleep(&req , &rem);
+		    return nanosleep(&req , &rem);
 }
 
 void msleep(int * pmilliseconds)  
 {
-	struct timespec ts_sleep = 
-	{
-		*pmilliseconds / 1000,
-		(*pmilliseconds % 1000) * 1000000L
-	};
-	nanosleep(&ts_sleep, NULL);
+	  struct timespec ts_sleep = 
+	  {
+			        *pmilliseconds / 1000,
+				    (*pmilliseconds % 1000) * 1000000L
+					      };
+	    nanosleep(&ts_sleep, NULL);
 }
 
 struct State{
@@ -48,7 +48,7 @@ struct State *State_create(char *name, int start, int final)
 {
 	struct State *state = malloc(sizeof(struct State));
 	assert(state != NULL);
-
+	
 	state->name = name;
 	state->zero = state;
 	state->one = state;
@@ -67,8 +67,8 @@ void State_destroy(struct State *state)
 void State_print(struct State *state)
 {
 	printf("%s, START? %d, FINAL? %d, ZERO-> %s, ONE-> %s\n", 
-			state->name, state->start, state->final, 
-			state->zero->name, state->one->name);
+          state->name, state->start, state->final, 
+          state->zero->name, state->one->name);
 }
 
 void States_destroy(struct State **states, int len)
@@ -126,20 +126,20 @@ int main(int argc, char *argv[])
 	for (i = 0; fgets(buff, size, lang); i++) {
 		int pos;
 		if (sscanf(buff, 
-					"[%d] NAME %s START %d FINAL %d ZERO %d ONE %d%n", 
-					&j, 
-					s_name[i], 
-					&s_start[i], 
-					&s_final[i],
-					&s_zero[i],
-					&s_one[i],
-					&pos) != 6 || pos != strlen(buff) - 1) 
+                 "[%d] NAME %s START %d FINAL %d ZERO %d ONE %d%n", 
+                  &j, 
+                  s_name[i], 
+                  &s_start[i], 
+                  &s_final[i],
+                  &s_zero[i],
+                  &s_one[i],
+                  &pos) != 6 || pos != strlen(buff) - 1) 
 		{
 			fprintf(stderr, "Error parsing states format: <%s>\n", buff);
 			exit(1);
 		} 
 	}
-
+	
 	// SET NUMBER OF STATES
 	int num_states = i;
 	//printf("Number of states: %d\n", i);
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 	for (i = 0; i < num_states; i++) {
 		states[i]->zero = states[s_zero[i]];
 		states[i]->one = states[s_one[i]];
-
+		
 		// Print states to console
 		State_print(states[i]);
 	}
@@ -199,9 +199,9 @@ int main(int argc, char *argv[])
 		} else if (input[i] == '1') {
 			state = state->one;
 		} else {
-
+			
 		}
-
+		
 		// Finish printing current transition
 		printf("%s", state->name);
 		if (state->final)
@@ -218,11 +218,11 @@ int main(int argc, char *argv[])
 		// Print time output of accepted matches
 		time_t rawtime;
 		struct tm *info;
-		char datebuf[80];
+ 		char datebuf[80];
 
-		time( &rawtime );
-		info = localtime( &rawtime );
-		strftime(datebuf,80,"%x %H:%M:%S", info);
+ 		time( &rawtime );
+   		info = localtime( &rawtime );
+   		strftime(datebuf,80,"%x %H:%M:%S", info);
 		printf("         %s\n", datebuf);
 
 		nsleep(250);
