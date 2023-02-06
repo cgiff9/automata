@@ -43,6 +43,23 @@ a supplied input string. Automaton only works
 over the alphabet {0, 1}.
 
 --------------
+   WARNING:
+--------------
+If you are getting undefined behavior when running
+your states file, and you're certain of its correctness,
+please observe the top of the file "dfa.c" and adjust
+the three long values under the "MACHINE CONSTANTS"
+comment. 
+
+Because this program was written in C, there are
+certain bounds that must be manually set in the
+source code. The current restrictions are:
+
+INPUT STRING NUMBER OF BITS:	10,000
+NUMBER OF STATES:				200
+STATE NAME CHARACTER LIMIT:		50
+
+--------------
    RUNNING:
 --------------
 The input string can be supplied directly as a

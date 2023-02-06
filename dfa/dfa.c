@@ -4,6 +4,19 @@
 #include <string.h>
 #include <time.h>
 
+// MACHINE CONSTANTS
+// Change the following three values as you see fit.
+// Just remember to re-compile this dfa
+// program when you change these constants:
+
+const unsigned long input_string_max = 10000;		// unenforced minimum (be careful)
+const unsigned long states_max = 200;				// absolute mimimum of 46 states	
+const unsigned long state_name_max = 50;			// absolute minimum of 2 characters
+
+// input_string_max = the maximum number of bits (0,1) allowed for an input string
+// states_max = the maximum number of states allowed in a states file
+// state_name_max = the maximum number of characters (letters) for a state name
+
 // sleep function for slight pause on ACCEPTED strings
 int nsleep(long miliseconds)
 {
@@ -79,8 +92,8 @@ int main(int argc, char *argv[])
 				printf("Error opening %s\n", argv[3]);
 				return -2;
 			}
-			char bits[10000];
-			fgets(bits, 10000, string_file); 
+			char bits[input_string_max];
+			fgets(bits, input_string_max, string_file); 
 			input = bits;
 			size_t ln = strlen(input) - 1;
 			if (input[ln] == '\n') input[ln] = '\0';
@@ -103,8 +116,9 @@ int main(int argc, char *argv[])
 	}
 
 	// READ STATES FROM FILE
-	int size = 200;  // minimum 46	
-	char s_name[size][5]; // DEFAULT:3 state NAME must contain at lesat two chars
+	unsigned long size = states_max;
+	//int size = 200;						// minimum 46	
+	char s_name[size][state_name_max];		// state NAME must contain at least 2 chars
 	int s_start[size], s_final[size], s_zero[size], s_one[size];
 
 	int i = 0;
