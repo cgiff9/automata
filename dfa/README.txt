@@ -36,8 +36,8 @@ Each line corresponds to a distinct state:
 NAME   : Provide non-spaced name for state
 START* : 1 if this is the start state, else 0
 FINAL  : 1 if this is a final state, else 0
-ZERO-> : Upon reading '0', go to the given array index
-ONE->  : Upon reading '1', go to the given array index
+ZERO   : Upon reading '0', go to the given array index
+ONE    : Upon reading '1', go to the given array index
 -------------------------------------------------
 * One and only one START state must exist.
 
@@ -92,8 +92,8 @@ Secondly, the INPUT string is regurgiated.
 Thirdly, the transitions made during the machine run
 are output line-by-line. The "(F)" indicates that the 
 latest transition has landed on a FINAL state. Thus, 
-the last line output before a state is ACCEPTED must 
-end with "(F)".
+the last line output before a state is ACCEPTED should 
+end with "(F)", provided there are no bugs!
 
 
 LAST MODIFIED: 23-02-06
