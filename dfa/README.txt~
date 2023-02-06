@@ -27,8 +27,8 @@ The supplied states file must follow a specific
 format. For instance, our file "oddNumberZeroes.txt"
 may contain:
 
-[0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
-[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
+[0] NAME q0 START 1 FINAL 0 ZERO-> 1 ONE-> 0
+[1] NAME q1 START 0 FINAL 1 ZERO-> 0 ONE-> 1
 
 Each line corresponds to a distinct state:
 -------------------------------------------------
@@ -96,5 +96,4 @@ the last line output before a state is ACCEPTED must
 end with "(F)".
 
 
-LAST MODIFIED: 23-02-06
-CREATION DATE: 15-02-09
+DATE: 15-02-09
