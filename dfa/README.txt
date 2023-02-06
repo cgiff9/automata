@@ -1,9 +1,34 @@
-README FOR DFA
-
-DISCLAIMER: This may be more of a Turing Machine than
+DISCLAIMER: 
+This may be more of a Turing Machine than
 simply a deterministic finite automaton. I may need
 to refresh my computing fundamentals to know for sure.
 Either way, enjoy! :)
+
+BUILDING:
+cd automata/dfa
+make dfa
+
+OPTIONAL SCRIPTS:
+I created two scripts:
+tm.sh
+ttm.sh
+
+They help automate the running of the dfa program
+over random input strings. You may find them useful
+or cumbersome. These scripts were created in the 
+bash shell on linux, and the "ttm.sh" script uses
+the "screen" command to create multiple instances
+of the "tm.sh" script. But hey, who am I to remind
+the intelligent user of the need to read scripts
+before running them? ;P
+
+You are always free to write your own
+scripts to automate the creation of input strings
+and/or run the machine multiple times. 
+
+Again, enjoy! :)
+
+README FOR DFA PROGRAM:
 
 This program reads a deterministic finite automaton
 from a supplied file and runs the automaton on 

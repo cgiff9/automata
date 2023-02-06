@@ -4,10 +4,7 @@
 #include <string.h>
 #include <time.h>
 
-#define _POSIX_C_SOURCE 199309L /* shall be >= 199309L */
-
-#include <time.h>
-
+// sleep function for slight pause on ACCEPTED strings
 int nsleep(long miliseconds)
 {
 	struct timespec req, rem;
@@ -24,16 +21,6 @@ int nsleep(long miliseconds)
 	}   
 
 	return nanosleep(&req , &rem);
-}
-
-void msleep(int * pmilliseconds)  
-{
-	struct timespec ts_sleep = 
-	{
-		*pmilliseconds / 1000,
-		(*pmilliseconds % 1000) * 1000000L
-	};
-	nanosleep(&ts_sleep, NULL);
 }
 
 struct State{
