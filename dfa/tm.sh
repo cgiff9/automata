@@ -3,7 +3,7 @@
 PROG_DIR=/home/chuck/automata/dfa
 DFA=${PROG_DIR}/dfa
 #MACHINE_FILE="${PROG_DIR}/auto_divisibleByThree.txt"
-MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_4th.txt"
+MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_5th.txt"
 #MACHINE_FILE="${PROG_DIR}/auto_acceptAll.txt"
 
 #INPUT_STR_CMD='$(echo "obase=2; $(od -vAn -N8 -tu8 < /dev/urandom)"|bc)'
@@ -17,7 +17,8 @@ if [ "$SLEEP_INTERVAL" -eq 0 ]; then
 	while true; do 
 		$DFA \
 			$MACHINE_FILE \
-			-f <(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[a-zA-Z1-9]/1/g' | tr 01 10)
+			-f <(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $INPUT_STR_LENGTH | head -n5 | sed 's/[a-zA-X1-9]/1/g' | tr 01 10)
+			#-f <(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[a-zA-X1-9]/1/g' | tr 01 10)
 			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[1-9]/1/g' | tr 01 10 )
 			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $((RANDOM%INPUT_STR_LENGTH+1)) | head -n5 | sed 's/[1-7]/1/g' | tr 01 10 | sed 's/8/00/g' | sed 's/9/000/g')
 			#-f <(cat /dev/urandom | tr -dc '[:digit:]' | fold -w $(( RANDOM % INPUT_STR_LENGTH + 1)) | head -n 5 | sed 's/[1-9]/1/g' | tr 01 10)
