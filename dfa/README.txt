@@ -1,14 +1,20 @@
-DISCLAIMER: 
+----------------
+   DISCLAIMER
+----------------
 This may be more of a Turing Machine than
 simply a deterministic finite automaton. I may need
 to refresh my computing fundamentals to know for sure.
 Either way, enjoy! :)
 
-BUILDING:
+--------------
+   BUILDING
+--------------
 cd automata/dfa
 make dfa
 
-OPTIONAL SCRIPTS:
+----------------------
+   OPTIONAL SCRIPTS
+----------------------
 I created two scripts:
 tm.sh
 ttm.sh
@@ -35,11 +41,14 @@ and/or run the machine multiple times.
 
 Again, enjoy! :)
 
-README FOR DFA PROGRAM:
-
+----------------------------
+----------------------------
+   README FOR DFA PROGRAM
+----------------------------
+----------------------------
 This program reads a deterministic finite automaton
-from a supplied file and runs the automaton on 
-a supplied input string. Automaton only works
+from a supplied "machine file" and runs the automaton 
+on a supplied input string. Automaton only works
 over the alphabet {0, 1}.
 
 Every character other than zero is treated as a 1. 
@@ -50,9 +59,9 @@ sequence "10". Please be aware of your shell's
 quirks when supplying input strings that contain
 certain special characters other than 0 and 1.
 
---------------
-   WARNING:
---------------
+-----------------------
+   MACHINE CONSTANTS
+-----------------------
 If you are getting undefined behavior when running
 your states file, and you're certain of its correctness,
 please observe the top of the file "dfa.c" and adjust
@@ -67,13 +76,19 @@ INPUT STRING NUMBER OF BITS:    10,000
 NUMBER OF STATES:               200
 STATE NAME CHARACTER LIMIT:     50
 
+These three constants (C Macro definitions)
+are called, respectively:
+   INPUT_STRING_MAX
+   STATE_MAX
+   STATE_NAME_MAX
+
 Please keep in mind the INPUT_STRING_MAX definition
 only applies to input strings supplied by file with
 the '-f' directive, which is described further below.
 
---------------
-   RUNNING:
---------------
+-------------------------
+   RUNNING THE MACHINE
+-------------------------
 The input string can be supplied directly as a
 command line argument as shown below:
 
@@ -84,19 +99,20 @@ The input string can also be supplied in a single-
 line file containing the input string:
 
 $./dfa <states file> -f <input string file>
-$./dfa oddNumberZeroes.txt -f input_string.txt
+$./dfa oddNumberZeroes.txt -f input_test_string.txt
 
 ------------------------
    STATES FILE FORMAT
 ------------------------
 The supplied states file must follow a specific
-format. For instance, our file "oddNumberZeroes.txt"
+format. For instance, the file "oddNumberZeroes.txt"
 may contain:
 
 [0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
 [1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
 
-Each line corresponds to a distinct state:
+Each line corresponds to a distinct state which
+contains the following information:
 -------------------------------------------------
 [i]    : Array location (index) of this state
 NAME   : Provide non-spaced name for state
@@ -105,9 +121,9 @@ FINAL  : 1 if this is a final state, else 0
 ZERO   : Upon reading '0', go to the given array index
 ONE    : Upon reading '1', go to the given array index
 -------------------------------------------------
-* One and only one START state must exist.
+*One and only one START state must exist.
 
-For example, in our "oddNumberZeroes.txt" file, the
+For example, in the "oddNumberZeroes.txt" file, the
 first line tells us that there is a state named "q0",
 which is the START state, but is not the FINAL state.
 If "q0" reads a '0', it goes to "q1".
@@ -126,10 +142,10 @@ and only one state must have a START bit of 1.
 ------------------------------
 An input string file, if used, must contain a
 single-line, uninterrupted string of '0's and
-'1's. For example, an input file "input_string.txt"
-may look like this:
+'1's. For example, an input file called 
+"input_test_string.txt" looks like this:
 
-1000000001010101010101010101
+111010000101010100010101111100000001010111
 
 Only the first line is read.
 
@@ -161,6 +177,8 @@ latest transition has landed on a FINAL state. Thus,
 the last line output before a state is ACCEPTED should 
 end with "(F)", provided there are no bugs!
 
+When a string is ACCEPTED, the output will delay for
+about 250ms and display the date and time.
 
-LAST MODIFIED: 23-02-06
+LAST MODIFIED: 23-02-08
 CREATION DATE: 15-02-09
