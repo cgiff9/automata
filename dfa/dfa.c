@@ -9,7 +9,7 @@
 // Just remember to re-compile this dfa
 // program when you change these constants:
 
-#define INPUT_STRING_MAX 100000		// applies only to input strings supplied by file (-f argument)
+#define INPUT_STRING_MAX 10000		// applies only to input strings supplied by file (-f argument)
 #define STATES_MAX 200				// undefined behavior for less than 46 states
 #define STATE_NAME_MAX 50			// undefined behavior for less than 2 characters
 
