@@ -79,7 +79,7 @@ STATE NAME CHARACTER LIMIT:     50
 These three constants (C Macro definitions)
 are called, respectively:
    INPUT_STRING_MAX
-   STATE_MAX
+   STATES_MAX
    STATE_NAME_MAX
 
 Please keep in mind the INPUT_STRING_MAX definition
