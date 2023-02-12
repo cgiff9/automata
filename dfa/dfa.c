@@ -1,7 +1,9 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <time.h>
 
 // MACHINE CONSTANTS
@@ -16,19 +18,32 @@
 int nsleep(long miliseconds)
 {
 	struct timespec req, rem;
-
 	if(miliseconds > 999)
 	{   
-		req.tv_sec = (int)(miliseconds / 1000);                            /* Must be Non-Negative */
-		req.tv_nsec = (miliseconds - ((long)req.tv_sec * 1000)) * 1000000; /* Must be in range of 0 to 999999999 */
+		/* Must be Non-Negative */
+		req.tv_sec = (int)(miliseconds / 1000); 
+		/* Must be in range of 0 to 999999999 */
+		req.tv_nsec = (miliseconds - 
+				((long)req.tv_sec * 1000)) * 1000000; 
 	}   
 	else
 	{   
-		req.tv_sec = 0;                         /* Must be Non-Negative */
+		req.tv_sec = 0;							/* Must be Non-Negative */
 		req.tv_nsec = miliseconds * 1000000;    /* Must be in range of 0 to 999999999 */
 	}   
-
 	return nanosleep(&req , &rem);
+}
+
+void print_date()
+{
+		time_t rawtime;
+		struct tm *info;
+		char datebuf[80];
+
+		time( &rawtime );
+		info = localtime( &rawtime );
+		strftime(datebuf,80,"%x %H:%M:%S", info);
+		printf("         %s\n", datebuf);
 }
 
 struct State{
@@ -43,12 +58,15 @@ struct State *State_create(char *name, int start, int final)
 {
 	struct State *state = malloc(sizeof(struct State));
 	assert(state != NULL);
-
+	
 	state->name = name;
-	state->zero = state;
-	state->one = state;
 	state->start = start;
 	state->final = final;
+
+	// Every state defaults to returning to itself
+	// upon a '0' and a '1'
+	state->zero = state;
+	state->one = state;
 
 	return state;
 }
@@ -66,6 +84,7 @@ void State_print(struct State *state)
 			state->zero->name, state->one->name);
 }
 
+// Destroying an array of states of a given length
 void States_destroy(struct State **states, int len)
 {
 	int i;
@@ -75,158 +94,248 @@ void States_destroy(struct State **states, int len)
 	}
 }
 
-int main(int argc, char *argv[]) 
+
+int flag_verbose = 1;
+char *input_string=NULL;
+char *machine_file=NULL;
+
+int main (int argc, char **argv)
 {
-	// READ INPUT STRING FROM CONSOLE OR FILE*
-	char *input;
-	if (argc == 4) {
-		if (!strcmp(argv[2], "-f")) {
-			FILE *string_file;	
-			string_file = fopen(argv[3], "r+");
-			if (string_file == NULL) {
-				printf("Error opening %s\n", argv[3]);
-				return -2;
-			}
-			char bits[INPUT_STRING_MAX];
-			fgets(bits, INPUT_STRING_MAX, string_file); 
-			input = bits;
-			size_t ln = strlen(input) - 1;
-			if (input[ln] == '\n') input[ln] = '\0';
+	//int flag_verbose = 0;
+	char *input_string_file = NULL;
+	int index;
+	int c;
+
+	opterr = 0;
+
+	while ((c = getopt (argc, argv, "qf:")) != -1)
+		switch (c)
+		{
+			case 'q':
+				flag_verbose = 0;
+				break;
+			case 'f':
+				input_string_file = optarg;
+				break;
+			case '?':
+				if (optopt == 'f')
+					fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+				else if (isprint (optopt))
+					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+				else
+					fprintf (stderr,
+							"Unknown option character `\\x%x'.\n",
+							optopt);
+				return 1;
+			default:
+				abort ();
 		}
-	} else if (argc == 3) {
-		if (!strcmp(argv[2], "-f")) {
-			printf("If invoking -f argument, please supply a valid file name\n"); 
-			return -1;
+
+
+	// 1st non-option index is always the machine file
+	// 2nd non-option index is always the input string
+	int nonoption_index=0;
+	char *machine_file_loc=NULL;
+	//char *input_string=NULL;
+	for (index = optind; index < argc; index++)
+	{
+		//printf ("Non-option argument %s\n", argv[index]);
+		switch(nonoption_index)
+		{
+			case 0:
+				machine_file_loc=argv[index];
+				nonoption_index+=1;
+				break;
+			case 1:
+				input_string=argv[index];
+				nonoption_index+=1;
+				break;
+			default:
+				//printf("Ignoring extra non-option argument %s\n", argv[index]);
 		}
-		input = argv[2];
-	} else if (argc != 3) {
-		return -1;
 	}
 
-	// OPEN STATES FILE
-	FILE *lang = fopen(argv[1], "r");
-	if (lang == NULL) {
-		printf("Error opening %s\n", argv[1]);
-		return -2;
+	//printf ("flag_verbose = %d, stringfile = %s, machinefile = %s, inputstring= %s\n",
+	//		flag_verbose, input_string_file, machine_file_loc, input_string);
+
+	if (input_string_file && input_string) 
+	{
+		(flag_verbose) && printf ("Input string file ignored due to prescence of direct input string.\n");
+	}
+
+	if (input_string_file && !input_string)
+	{
+		(flag_verbose) && printf ("Reading input string from file %s:\n", input_string_file);
+
+		FILE *input_string_filestream;
+		char input_string_bits[INPUT_STRING_MAX];
+
+		input_string_filestream = fopen(input_string_file, "r");
+		if (input_string_filestream == NULL) {
+			fprintf(stderr, "Error opening %s\n", input_string_file);
+			exit(2);
+		}
+
+		fgets(input_string_bits, INPUT_STRING_MAX, input_string_filestream);
+		input_string = input_string_bits;
+		fclose(input_string_filestream);
+
+		// Remove newline from input string
+		//size_t ln = strlen(input_string) - 1;
+		//if (input_string[ln] == '\n') input_string[ln] = '\0';
+
+		input_string[strcspn(input_string, "\r\n")] = 0;
+
+	} else {
+		(flag_verbose) && printf("Reading input string directly from command line:\n");
+	}
+
+	(flag_verbose) && printf ("\t==>%s\n",input_string);
+
+	// OPEN MACHINE FILE
+	FILE *machine_filestream = fopen(machine_file_loc, "r");
+	if (machine_filestream == NULL) {
+		fprintf(stderr, "Error opening %s\n", machine_file_loc);
+		exit(3);
 	}
 
 	// READ STATES FROM FILE
-	unsigned long size = STATES_MAX;
-	//int size = 200;						// minimum 46	
-	char s_name[size][STATE_NAME_MAX];		// state NAME must contain at least 2 chars
-	int s_start[size], s_final[size], s_zero[size], s_one[size];
+	char s_name[STATES_MAX][STATE_NAME_MAX];
+	int s_start[STATES_MAX], s_final[STATES_MAX], s_zero[STATES_MAX], s_one[STATES_MAX];
 
-	int i = 0;
-	int j;	
-	char buff[size];
-	for (i = 0; fgets(buff, size, lang); i++) {
+	int num_states = 0;
+	int s_indexes[STATES_MAX];
+	char state_strings[STATES_MAX];
+	for (num_states = 0; fgets(state_strings, STATES_MAX, machine_filestream); num_states++) {
 		int pos;
-		if (sscanf(buff, 
+		if (sscanf(state_strings, 
 					"[%d] NAME %s START %d FINAL %d ZERO %d ONE %d%n", 
-					&j, 
-					s_name[i], 
-					&s_start[i], 
-					&s_final[i],
-					&s_zero[i],
-					&s_one[i],
-					&pos) != 6 || pos != strlen(buff) - 1) 
+					&s_indexes[num_states], 
+					s_name[num_states], 
+					&s_start[num_states], 
+					&s_final[num_states],
+					&s_zero[num_states],
+					&s_one[num_states],
+					&pos) != 6 || pos != strlen(state_strings) - 1) 
 		{
-			fprintf(stderr, "Error parsing states format: <%s>\n", buff);
-			exit(1);
+			fprintf(stderr, "Error parsing machine file %s\n"
+				"Maximum allowable states is %d.\n"
+				"Please adjust the STATES_MAX definition in dfa.c and recompile if you need more states.\n",
+				machine_file_loc, STATES_MAX);
+
+			exit(4);
 		} 
 	}
+	
+	fclose(machine_filestream);
 
-	// SET NUMBER OF STATES
-	int num_states = i;
-	//printf("Number of states: %d\n", i);
+	/*	
+	for (int k=0; k < num_states; k++) {
+		printf ("state_indexes[%d] = %d\n", k, s_indexes[k]);
+	}
+
+	for (int i=0; i < num_states; i++) {
+		for (int j=0; j < num_states; j++) {
+			if (s_indexes[i] == s_indexes[j]) {
+				fprintf(stderr, "Duplicate indexes detected in machine file: %d\n", s_indexes[i]);
+				exit(4);
+			}
+		}
+	}
+
+	printf("Number of states: %d\n", num_states);
+	*/
 
 	// ENSURE LEGAL NUMBER OF START AND END STATES
 	int starts = 0;
 	int finals = 0;
+	int i = 0;
 	for (i = 0; i < num_states; i++) {
-		if (s_start[i]) starts += 1;
-		if (s_final[i]) finals += 1;
-		if (starts > 1) {
-			printf("More than one start state detected. Aborting...\n");
-			return -2;
+		if (s_start[i]) { 
+			starts += 1;
 		}
+		if (starts > 1) {
+			fprintf(stderr, "More than one start state detected. Aborting...\n");
+			exit(5);
+		}
+		if (s_final[i]) finals += 1;
 	}
+
 	if (!starts) {
-		printf("No start states detected. Aborting...\n");
-		return -2;
+		fprintf(stderr, "No start states detected. Aborting...\n");
+		exit(5);
 	}
 	if (!finals) {
-		printf("No final states detected. Aborting...\n");
-		return -2;
+		fprintf(stderr, "No final states detected. Aborting...\n");
+		exit(5);
 	}
 
-	// CREATE "ARRAY" OF STATES
+	// CREATE ARRAY OF STATES
 	struct State *states[num_states];
 
-	// INITIALIZE START STATE
+	// INITIALIZE FIRST STATE
 	struct State *state;
 
 	// FILL ARRAY WITH STATE NAMES, START, FINAL
+	int state_index = s_indexes[0];
 	for (i = 0; i < num_states; i++) {
-		struct State *new_state = State_create(s_name[i], s_start[i], s_final[i]);
-		states[i] = new_state;
+		struct State *new_state = State_create(s_name[i], 
+				s_start[i], 
+				s_final[i]);
+		states[state_index] = new_state;
 
 		// Set start state
-		if (new_state->start) state = new_state;;
+		if (new_state->start) state = new_state;
+
+		state_index = s_indexes[i+1];
 	}
 
 	// FILL ARRAY WITH TRANSITIONS
+	state_index = s_indexes[0];
 	for (i = 0; i < num_states; i++) {
-		states[i]->zero = states[s_zero[i]];
-		states[i]->one = states[s_one[i]];
+		states[state_index]->zero = states[s_zero[i]];
+		states[state_index]->one = states[s_one[i]];
 
 		// Print states to console
-		State_print(states[i]);
+		if (flag_verbose) State_print(states[i]);
+	
+		state_index = s_indexes[i+1];
 	}
 
-	// PRINT INPUT STRING
-	printf("INPUT: %s\n", input);
-
 	// RUN MACHINE
-	for(i = 0; input[i] != '\0'; i++) {
-		printf("%c: %s -> ", input[i], state->name);
-		if (input[i] == '0') {
+	for (i = 0; input_string[i] != '\0'; i++) {
+		(flag_verbose) && printf("%c: %s -> ", input_string[i], state->name);
+		if (input_string[i] == '0') {
 			state = state->zero;
-		//} else if (input[i] == '1') {
+		//} else if (input_string[i] == '1') {
 		//	state = state->one;
 		} else {
 			state = state->one;
 		}
 
 		// Finish printing current transition
-		printf("%s", state->name);
+		(flag_verbose) && printf("%s", state->name);
 		if (state->final)
-			printf(" (F)\n");
+			(flag_verbose) && printf(" (F)\n");
 		else
-			printf("\n");
+			(flag_verbose) && printf("\n");
 	}
 
 	// ACCEPTED OR REJECTED?
 	if (state->final == 1) {
-		printf("        (ACCEPTED):\n\t-->%s\n", input);
-		States_destroy(states, num_states);
-
-		// Print time output of accepted matches
-		time_t rawtime;
-		struct tm *info;
-		char datebuf[80];
-
-		time( &rawtime );
-		info = localtime( &rawtime );
-		strftime(datebuf,80,"%x %H:%M:%S", info);
-		printf("         %s\n", datebuf);
-
+		(flag_verbose) && printf("(ACCEPTED):\n\t==>%s\n", input_string);
+		if (flag_verbose) print_date();
 		nsleep(250);
 		return 0;
-	} else if (state->final == 0) {
-		printf("(REJECTED):\n\t-->%s\n", input);
-		States_destroy(states, num_states);
+	//} else if (state->final == 0) {
+	} else {
+		(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", input_string);
 		//nsleep(10);
 		return 1;
 	}
+
+	States_destroy(states, num_states);
+
+	return 0;
 }
+
