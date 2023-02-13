@@ -3,7 +3,7 @@
 PROG_DIR=/home/chuck/automata/dfa
 DFA=${PROG_DIR}/dfa
 #MACHINE_FILE="${PROG_DIR}/auto_divisibleByThree.txt"
-MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_4th.txt"
+MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_5th.txt"
 #MACHINE_FILE="${PROG_DIR}/auto_acceptAll.txt"
 
 #INPUT_STR_CMD='$(echo "obase=2; $(od -vAn -N8 -tu8 < /dev/urandom)"|bc)'
@@ -16,6 +16,7 @@ SLEEP_INTERVAL=${2:-0}
 if [ "$SLEEP_INTERVAL" -eq 0 ]; then
 	while true; do 
 		$DFA \
+			-o /tmp/tm_accepted.txt \
 			$MACHINE_FILE \
 			$(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $INPUT_STR_LENGTH | head -n1 | sed 's/[a-zA-X1-9]/1/g' | tr 01 10)
 			#-f <(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $INPUT_STR_LENGTH | head -n1 | sed 's/[a-zA-X1-9]/1/g' | tr 01 10)
