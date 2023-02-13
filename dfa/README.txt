@@ -86,6 +86,31 @@ Please keep in mind the INPUT_STRING_MAX definition
 only applies to input strings supplied by file with
 the '-f' directive, which is described further below.
 
+----------------
+   PARAMETERS
+----------------
+-q           quiet; turn off printout and delays
+             *program returns 1 on accept, 0 on reject
+-a <num>     delay printout on string accept by 'num' ms
+-r <num>     delay printout on string reject by 'num' ms
+-f <file>    input string file
+             *only first line is read
+             *command-line input string overrides this
+-o <file>    output accept file
+             *date string accepted also output 
+             *file is created if it doesn't exist
+
+The machine file and input string are supplied as such:
+./dfa machineFile.txt 10001
+
+Other parameters can be mixed throughout:
+./dfa -q machineFile.txt -a600 -r100 10001 -o /tmp/acc.txt
+
+Just know that the first "non-option" parameter is always
+the machine file and the 2nd "non-option" paramter is 
+always the input string. The input string supplied directly
+via the command line always overrides the '-f' option. 
+
 -------------------------
    RUNNING THE MACHINE
 -------------------------
@@ -100,6 +125,10 @@ line file containing the input string:
 
 $./dfa <states file> -f <input string file>
 $./dfa oddNumberZeroes.txt -f input_test_string.txt
+
+Not that if an input string is supplied via the command-
+line while also invoking the '-f' option, then the '-f'
+option will be ignored.
 
 ------------------------
    STATES FILE FORMAT
@@ -137,17 +166,54 @@ If "q1" reads a '1', it goes to "q1" (back to itself).
 Note that there is only one START bit set to 1. One 
 and only one state must have a START bit of 1.
 
+The numbers inside the brackets [num] are indexes of
+the state described by the particular line. These
+indexes are used by the ZERO and ONE to describe the
+transition function of the state.
+
+The indexes do not need to be in numerical order. This
+may help for particularly complex machines where it may
+be logical/visually necessarily to insert a new 
+state between two others. For instance, the four 
+machine files:
+
+[0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
+[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
+
+and
+
+[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
+[0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
+
+and
+
+[1] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
+[0] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
+
+and 
+
+[100] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
+[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
+
+...are all logically equivalent.
+
+Take care not to use the same index for two
+states, as undefined behavior will occur.
+
 ------------------------------
    INPUT STRING FILE FORMAT
 ------------------------------
-An input string file, if used, must contain a
-single-line, uninterrupted string of '0's and
-'1's. For example, an input file called 
+If an input string file is used, ie.:
+    '-f input_test_string.txt' 
+then it must contain a single-line, 
+uninterrupted string of '0's and '1's. 
+For example, the input file called 
 "input_test_string.txt" looks like this:
 
 111010000101010100010101111100000001010111
 
-Only the first line is read.
+Only the first line is read, so other lines
+will (for now) be ignored.
 
 --------------------
    READING OUTPUT
@@ -165,11 +231,13 @@ INPUT: 10100
 0: q0 -> q1 (F)
 ACCEPTED.
 
-First, the input states are regurgitated for the 
-user's covenience. In the future, a '-v' argument
-will specifically invoke this action.
+First, the input states are printed for the 
+user's covenience. If this is not wanted, the
+'-q' option can remove any printed output. Know
+that the program returns 0 on a rejected string
+and 1 on an accepted string.
 
-Secondly, the INPUT string is regurgiated.
+Secondly, the INPUT string is displayed..
 
 Thirdly, the transitions made during the machine run
 are output line-by-line. The "(F)" indicates that the 
@@ -177,8 +245,17 @@ latest transition has landed on a FINAL state. Thus,
 the last line output before a state is ACCEPTED should 
 end with "(F)", provided there are no bugs!
 
-When a string is ACCEPTED, the output will delay for
-about 250ms and display the date and time.
+Optional delay paramters can be used to pause the
+output on an accepted state and/or a rejected state.
+For example:
+
+./dfa auto_mysetery.txt 110101 -a500 -r40
+
+will delay the output for 500 milliseconds on an
+accepted string or delay 40 milliseconds on a 
+rejected string. Both options allow for scripts/
+batch operations using this program to slow down
+sufficiently to be observed.
 
 LAST MODIFIED: 23-02-08
 CREATION DATE: 15-02-09
