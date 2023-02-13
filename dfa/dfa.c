@@ -159,15 +159,18 @@ int main (int argc, char **argv)
 		}
 	}
 
+	/*
+	// PARAMTER DEBUGGING
 	printf ("\t(-q)  flag_verbose = %d\n"
-			"\t(-a)  sleep_accept_msec = %d\n"
-			"\t(-r)  sleep_reject_msec = %d\n"
-			"\t(-f*) input_string_file = %s\n"
-			"\t(-o*) output_accept_file = %s\n"
-			"\t(1st) machine_file = %s\n"
-			"\t(2nd) input_string= %s\n",
-			flag_verbose, sleep_accept_msec, sleep_reject_msec, input_string_file, output_accept_file, machine_file, input_string);
-	//return 0;
+	"\t(-a*)  sleep_accept_msec = %d\n"
+	"\t(-r*)  sleep_reject_msec = %d\n"
+	"\t(-f*) input_string_file = %s\n"
+	"\t(-o*) output_accept_file = %s\n"
+	"\t(1st) machine_file = %s\n"
+	"\t(2nd) input_string= %s\n",
+	flag_verbose, sleep_accept_msec, sleep_reject_msec, input_string_file, output_accept_file, machine_file, input_string);
+	// return 0;
+	*/
 
 	if (input_string_file && input_string) 
 	{
@@ -242,22 +245,25 @@ int main (int argc, char **argv)
 
 	fclose(machine_filestream);
 
-	/*	
-		for (int k=0; k < num_states; k++) {
+	/* DEBUGGING STATE ARRAY vs. STATE INDEXES
+	for (int k=0; k < num_states; k++) {
 		printf ("state_indexes[%d] = %d\n", k, s_indexes[k]);
-		}
+	}
+	*/
 
-		for (int i=0; i < num_states; i++) {
+	// Ensure indexes in machine file are unique
+	for (int i=0; i < num_states; i++) {
 		for (int j=0; j < num_states; j++) {
-		if (s_indexes[i] == s_indexes[j]) {
-		fprintf(stderr, "Duplicate indexes detected in machine file: %d\n", s_indexes[i]);
-		return 4;
+			if (s_indexes[i] == s_indexes[j] && i != j) {
+				fprintf(stderr, "Duplicate indexes detected in machine file: [%d]\n", s_indexes[i]);
+				return 4;
+			}
 		}
-		}
-		}
+	}
+	//return 0;
 
-		printf("Number of states: %d\n", num_states);
-		*/
+		//printf("Number of states: %d\n", num_states);
+		
 
 	// ENSURE LEGAL NUMBER OF START AND END STATES
 	int starts = 0;
@@ -320,8 +326,8 @@ int main (int argc, char **argv)
 		(flag_verbose) && printf("%c: %s -> ", input_string[i], state->name);
 		if (input_string[i] == '0') {
 			state = state->zero;
-			//} else if (input_string[i] == '1') {
-			//	state = state->one;
+	//} else if (input_string[i] == '1') {
+	//	state = state->one;
 	} else {
 		state = state->one;
 	}
@@ -348,7 +354,7 @@ int main (int argc, char **argv)
 				fprintf(stderr, "Error opening output accepted strings file %s", output_accept_file);
 				return 3;
 			}
-			fprintf(output_accept_filestream, "(ACCEPTED:\n\t==>%s\n\t%s\n", input_string, print_date());
+			fprintf(output_accept_filestream, "(ACCEPTED):\n\t==>%s\n\t%s\n", input_string, print_date());
 			fclose(output_accept_filestream);
 
 		}

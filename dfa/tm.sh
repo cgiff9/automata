@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROG_DIR=/home/chuck/automata/dfa
+PROG_DIR=~/automata/dfa
 DFA=${PROG_DIR}/dfa
 #MACHINE_FILE="${PROG_DIR}/auto_divisibleByThree.txt"
 MACHINE_FILE="${PROG_DIR}/auto_Liouville_contains_5th.txt"

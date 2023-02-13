@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROG_DIR=/home/chuck/automata/dfa
+PROG_DIR=~/automata/dfa
 TM=${PROG_DIR}/tm.sh
 NUM_MACHINES=${1:-$(nproc)}
 
