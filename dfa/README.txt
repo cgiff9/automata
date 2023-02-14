@@ -12,35 +12,6 @@ Either way, enjoy! :)
 cd automata/dfa
 make dfa
 
-----------------------
-   OPTIONAL SCRIPTS
-----------------------
-I created two scripts:
-tm.sh
-ttm.sh
-
-They help automate the running of the dfa program
-over random input strings. You may find them useful
-or cumbersome. These scripts were created in the 
-bash shell on linux, and the "ttm.sh" script uses
-the "screen" command to create multiple instances
-of the "tm.sh" script. But hey, who am I to remind
-the intelligent user of the need to read scripts
-before running them? ;P
-
-There is one more script which could be used by
-"tm.sh" called "genbits.sh" which creates strings
-with a potentially limited number of ones and a
-potentially massive number of zeroes. I'll let you
-figure out which states files such script may be
-useful for. ;)
-
-You are always free to write your own
-scripts to automate the creation of input strings
-and/or run the machine multiple times. 
-
-Again, enjoy! :)
-
 ----------------------------
 ----------------------------
    README FOR DFA PROGRAM
@@ -287,6 +258,40 @@ milliseconds on an accepted string or delay 40
 milliseconds on a rejected string. Both options allow 
 for scripts/batch operations using this program to slow 
 down sufficiently to be observed more slowly.
+
+----------------------
+   OPTIONAL SCRIPTS
+----------------------
+There are two scripts:
+tm.sh
+ttm.sh
+
+They help automate the running of the dfa program
+over random input strings. You may find them useful
+or cumbersome. These scripts were created in the 
+bash shell on linux, and the "ttm.sh" script uses
+the "screen" command to create multiple instances
+of the "tm.sh" script. But hey, who am I to remind
+the intelligent user of the need to read scripts
+before running them? ;P
+
+There is one more script which could be used by
+"tm.sh" called "genbits.sh" which creates strings
+with a potentially limited number of ones and a
+potentially massive number of zeroes. I'll let you
+figure out which states files such script may be
+useful for. ;)
+
+You are always free to write your own
+scripts to automate the creation of input strings
+and/or run the machine multiple times. 
+
+Keep in mind that with new functionalities being
+introduced to the dfa program, these scripts may
+become essentially obsoleted to a degree.
+
+Again, enjoy the program:)
+
 
 LAST MODIFIED: 23-02-14
 CREATION DATE: 15-02-09
