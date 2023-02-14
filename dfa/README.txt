@@ -94,7 +94,7 @@ the '-f' directive, which is described further below.
 -a <num>     delay printout on string accept by 'num' ms
 -r <num>     delay printout on string reject by 'num' ms
 -f <file>    input string file
-             *only first line is read
+             *may contain multiple strings, one per line
              *command-line input string overrides this
 -o <file>    output accept file
              *date string accepted also output 
@@ -212,8 +212,39 @@ For example, the input file called
 
 111010000101010100010101111100000001010111
 
-Only the first line is read, so other lines
-will (for now) be ignored.
+This file may contain multiple strings, with
+one per line. Linefeed and newline characters
+will not be included in the string. Characters
+other than linefeeds and newlines will be 
+interpreted as '1's, including spaces and tabs.
+Be careful with how you structure these files.
+
+Other examples that are tested to work on Linux:
+
+./dfa auto_Liouville_contains_3rd.txt -f \
+     input_test_string_multi.txt
+
+./dfa auto_Liouville_contains_5th.txt -f \
+     <(cat /dev/urandom | tr -dc '[:alnum:]' | \
+     fold -w 4096 | \
+     sed 's/[a-zA-X1-9]/1/g' | \
+     tr 01 10)
+
+./dfa auto_Liouville_contains_3rd.txt -f <(cat <<EOF
+110001
+1010101
+1000101
+EOF
+)
+
+Note that at least on Linux, you may provide files
+that produce an infinite number of lines, like the
+random device /dev/urandom. Keep in mind you will 
+need to halt the program manually with CTRL+C or
+my killing the ./dfa process. Be careful with the
+random device, though, or you may end up looking at
+very unfamiliar characters in your terminal (the
+'reset' command is helpful if this happens).
 
 --------------------
    READING OUTPUT

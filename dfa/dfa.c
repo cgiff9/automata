@@ -5,6 +5,7 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#include <signal.h>
 
 // MACHINE CONSTANTS
 // Change the following three values as you see fit.
@@ -26,6 +27,8 @@ char *input_string=NULL;
 char *machine_file=NULL;
 
 char datebuf[100];
+
+void INThandler(int);
 
 int nsleep(long miliseconds)
 {
@@ -101,16 +104,101 @@ void State_print(struct State *state)
 void States_destroy(struct State **states, int len)
 {
 	int i;
-	for (i = 0; i < len; i++) {
+	printf ("Closing machine %s: {%s...", machine_file, states[0]->name);
+	State_destroy(states[0]);
+	for (i = 1; i < len-1; i++) {
 		//printf("Destroying state %s...\n", states[i]->name);
 		State_destroy(states[i]);
 	}
+	printf ("%s}\n", states[len-1]->name);
+	State_destroy(states[len-1]);
+
+}
+
+static volatile int keep_running=1;
+void int_handler(int dummy)
+{
+	keep_running = 0;
+}
+
+// INITIALIZE FIRST STATE
+struct State *state;
+struct State *state_start;
+
+int num_states = 0;
+char *output_accept_file = NULL;
+int dfa_run()
+{
+	// SET START STATE
+	state=state_start;
+
+	// RUN MACHINE
+	for (int i = 0; input_string[i] != '\0'; i++) {
+		(flag_verbose) && printf("%c: %s -> ", input_string[i], state->name);
+		if (input_string[i] == '0') {
+			state = state->zero;
+	//} else if (input_string[i] == '1') {
+	//	state = state->one;
+	} else {
+		state = state->one;
+	}
+
+	// Finish printing current transition
+	(flag_verbose) && printf("%s", state->name);
+	if (state->final)
+		(flag_verbose) && printf(" (F)\n");
+	else
+		(flag_verbose) && printf("\n");
+	}
+
+	// ACCEPTED OR REJECTED?
+	if (state->final == 1) {
+		(flag_verbose) && printf("(ACCEPTED):\n\t==>%s\n", input_string);
+		if (flag_verbose && !output_accept_file) print_date();
+	
+		// output accepted strings to a supplied file
+		if (output_accept_file != NULL ) {
+			FILE *output_accept_fp;
+			output_accept_fp = fopen(output_accept_file, "a");
+
+			if (output_accept_fp == NULL) {
+				fprintf(stderr, "Error opening output accepted strings file %s", output_accept_file);
+				return 3;
+			}
+			fprintf(output_accept_fp, "(ACCEPTED):\n\t==>%s\n\t%s\n", input_string, print_date());
+			fclose(output_accept_fp);
+
+		}
+
+		// Delay output on accept?
+		if (flag_verbose && sleep_accept_msec >=0) {
+			if (sleep_accept_msec == 0)
+				sleep_accept_msec = SLEEP_ACCEPT_MSEC;
+			nsleep(sleep_accept_msec);
+		}
+		//free(input_string);
+		return 0;
+
+	//} else if (state->final == 0) {
+	} else {
+		(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", input_string);
+		
+		// Delay output on reject?
+		if (flag_verbose && sleep_reject_msec >=0) {
+			if (sleep_reject_msec == 0)
+				sleep_reject_msec = SLEEP_REJECT_MSEC;
+			nsleep(sleep_reject_msec);
+		}
+		//free(input_string);
+		return 1;
+	}
+
 }
 
 int main (int argc, char **argv)
 {
 	char *input_string_file = NULL;
-	char *output_accept_file = NULL;
+	//char *output_accept_file = NULL;
 
 	int index;
 	int opt;
@@ -177,39 +265,12 @@ int main (int argc, char **argv)
 		(flag_verbose) && printf ("Input string file ignored due to prescence of direct input string.\n");
 	}
 
-	if (input_string_file && !input_string)
-	{
-		(flag_verbose) && printf ("Reading input string from file %s:\n", input_string_file);
-
-		FILE *input_string_filestream;
-		char input_string_bits[INPUT_STRING_MAX];
-
-		input_string_filestream = fopen(input_string_file, "r");
-		if (input_string_filestream == NULL) {
-			fprintf(stderr, "Error opening %s\n", input_string_file);
-			return 3;
-		}
-
-		fgets(input_string_bits, INPUT_STRING_MAX, input_string_filestream);
-		input_string = input_string_bits;
-		fclose(input_string_filestream);
-
-		// Remove newline from input string
-		//size_t ln = strlen(input_string) - 1;
-		//if (input_string[ln] == '\n') input_string[ln] = '\0';
-		input_string[strcspn(input_string, "\r\n")] = 0;
-
-	} else {
-		(flag_verbose) && printf("Reading input string directly from command line:\n");
-	}
-
-	(flag_verbose) && printf ("\t==>%s\n",input_string);
 
 	// OPEN MACHINE FILE
-	FILE *machine_filestream;
+	FILE *machine_fp;
 	if (machine_file != NULL) {
-		machine_filestream = fopen(machine_file, "r");
-		if (machine_filestream == NULL) {
+		machine_fp = fopen(machine_file, "r");
+		if (machine_fp == NULL) {
 			fprintf(stderr, "Error opening %s\n", machine_file);
 			return 3;
 		}
@@ -219,10 +280,10 @@ int main (int argc, char **argv)
 	char s_name[STATES_MAX][STATE_NAME_MAX];
 	int s_start[STATES_MAX], s_final[STATES_MAX], s_zero[STATES_MAX], s_one[STATES_MAX];
 
-	int num_states = 0;
+	//int num_states = 0;
 	int s_indexes[STATES_MAX];
 	char state_strings[STATES_MAX];
-	for (num_states = 0; fgets(state_strings, STATES_MAX, machine_filestream); num_states++) {
+	for (num_states = 0; fgets(state_strings, STATES_MAX, machine_fp); num_states++) {
 		int pos;
 		if (sscanf(state_strings, 
 					"[%d] NAME %s START %d FINAL %d ZERO %d ONE %d%n", 
@@ -243,7 +304,7 @@ int main (int argc, char **argv)
 		} 
 	}
 
-	fclose(machine_filestream);
+	fclose(machine_fp);
 
 	/* DEBUGGING STATE ARRAY vs. STATE INDEXES
 	for (int k=0; k < num_states; k++) {
@@ -293,7 +354,7 @@ int main (int argc, char **argv)
 	struct State *states[num_states];
 
 	// INITIALIZE FIRST STATE
-	struct State *state;
+	//struct State *state;
 
 	// FILL ARRAY WITH STATE NAMES, START, FINAL
 	int state_index = s_indexes[0];
@@ -304,7 +365,8 @@ int main (int argc, char **argv)
 		states[state_index] = new_state;
 
 		// Set start state
-		if (new_state->start) state = new_state;
+		//if (new_state->start) state = new_state;
+		if (new_state->start) state_start = new_state;
 
 		state_index = s_indexes[i+1];
 	}
@@ -321,67 +383,69 @@ int main (int argc, char **argv)
 		state_index = s_indexes[i+1];
 	}
 
-	// RUN MACHINE
-	for (i = 0; input_string[i] != '\0'; i++) {
-		(flag_verbose) && printf("%c: %s -> ", input_string[i], state->name);
-		if (input_string[i] == '0') {
-			state = state->zero;
-	//} else if (input_string[i] == '1') {
-	//	state = state->one;
+	/*
+	if (input_string_file && !input_string)
+	{
+		(flag_verbose) && printf ("Reading input string from file %s:\n", input_string_file);
+
+		FILE *input_string_fp;
+		char input_string_bits[INPUT_STRING_MAX];
+
+		input_string_fp = fopen(input_string_file, "r");
+		if (input_string_fp == NULL) {
+			fprintf(stderr, "Error opening %s\n", input_string_file);
+			return 3;
+		}
+
+		fgets(input_string_bits, INPUT_STRING_MAX, input_string_fp);
+		input_string = input_string_bits;
+		fclose(input_string_fp);
+
+		// Remove newline from input string
+		//size_t ln = strlen(input_string) - 1;
+		//if (input_string[ln] == '\n') input_string[ln] = '\0';
+		input_string[strcspn(input_string, "\r\n")] = 0;
+
 	} else {
-		state = state->one;
+		(flag_verbose) && printf("Reading input string directly from command line:\n");
 	}
 
-	// Finish printing current transition
-	(flag_verbose) && printf("%s", state->name);
-	if (state->final)
-		(flag_verbose) && printf(" (F)\n");
-	else
-		(flag_verbose) && printf("\n");
-	}
+	(flag_verbose) && printf ("\t==>%s\n",input_string);
+	*/
 
-	// ACCEPTED OR REJECTED?
-	if (state->final == 1) {
-		(flag_verbose) && printf("(ACCEPTED):\n\t==>%s\n", input_string);
-		if (flag_verbose && !output_accept_file) print_date();
-	
-		// output accepted strings to a supplied file
-		if (output_accept_file != NULL ) {
-			FILE *output_accept_filestream;
-			output_accept_filestream = fopen(output_accept_file, "a");
+	if (input_string_file && !input_string)
+	{
+		FILE *input_string_fp;
+		char *input_string_bits = NULL;
+		size_t len = 0;
+		ssize_t read;
 
-			if (output_accept_filestream == NULL) {
-				fprintf(stderr, "Error opening output accepted strings file %s", output_accept_file);
-				return 3;
+		input_string_fp = fopen(input_string_file, "r");
+		if (input_string_fp == NULL) {
+			fprintf(stderr, "Error opening %s\n", input_string_file);
+			return 3;
+		}
+
+		while ((read = getline(&input_string_bits, &len, input_string_fp)) != -1)
+		{
+			input_string = input_string_bits;
+			input_string[strcspn(input_string, "\r\n")] = 0;
+			
+			dfa_run();
+			signal(SIGINT, int_handler);
+			while(!keep_running) {
+				fclose(input_string_fp);
+				States_destroy(states, num_states);
+				return 0;
 			}
-			fprintf(output_accept_filestream, "(ACCEPTED):\n\t==>%s\n\t%s\n", input_string, print_date());
-			fclose(output_accept_filestream);
-
 		}
+		fclose(input_string_fp);
 
-		// Delay output on accept?
-		if (flag_verbose && sleep_accept_msec >=0) {
-			if (sleep_accept_msec == 0)
-				sleep_accept_msec = SLEEP_ACCEPT_MSEC;
-			nsleep(sleep_accept_msec);
-		}
-		return 0;
-
-	//} else if (state->final == 0) {
 	} else {
-		(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", input_string);
-		
-		// Delay output on reject?
-		if (flag_verbose && sleep_reject_msec >=0) {
-			if (sleep_reject_msec == 0)
-				sleep_reject_msec = SLEEP_REJECT_MSEC;
-			nsleep(sleep_reject_msec);
-		}
-		return 1;
+		dfa_run();
 	}
 
 	States_destroy(states, num_states);
 
 	return 0;
 }
-

@@ -16,7 +16,7 @@ SLEEP_INTERVAL=${2:-0}
 if [ "$SLEEP_INTERVAL" -eq 0 ]; then
 	while true; do 
 		$DFA \
-			-o /tmp/tm_accepted.txt \
+			-q -o /tmp/tm_accepted.txt \
 			$MACHINE_FILE \
 			$(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $INPUT_STR_LENGTH | head -n1 | sed 's/[a-zA-X1-9]/1/g' | tr 01 10)
 			#-f <(cat /dev/urandom | tr -dc '[:alnum:]' | fold -w $INPUT_STR_LENGTH | head -n1 | sed 's/[a-zA-X1-9]/1/g' | tr 01 10)
