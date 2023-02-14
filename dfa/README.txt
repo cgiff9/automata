@@ -168,7 +168,7 @@ and only one state must have a START bit of 1.
 
 The numbers inside the brackets [num] are indexes of
 the state described by the particular line. These
-indexes are used by the ZERO and ONE to describe the
+indexes are used by ZERO and ONE to describe the
 transition function of the state.
 
 The indexes do not need to be in numerical order. This
@@ -198,25 +198,29 @@ and
 ...are all logically equivalent.
 
 Take care not to use the same index for two
-states, as undefined behavior will occur.
+states, or the machine will complain about
+the duplicate indexes.
 
 ------------------------------
    INPUT STRING FILE FORMAT
 ------------------------------
 If an input string file is used, ie.:
     '-f input_test_string.txt' 
-then it must contain a single-line, 
-uninterrupted string of '0's and '1's. 
-For example, the input file called 
-"input_test_string.txt" looks like this:
+then it may contain an uninterrupted string 
+of '0's and '1's. For example, the input file 
+called  "input_test_string.txt" looks like this:
 
 111010000101010100010101111100000001010111
 
 This file may contain multiple strings, with
 one per line. Linefeed and newline characters
-will not be included in the string. Characters
-other than linefeeds and newlines will be 
-interpreted as '1's, including spaces and tabs.
+will not be included in the string (keep in mind
+this does not refer to the separate characters
+'\' and '\n' together, but to simply pressing
+the 'ENTER/RETURN' button. 
+
+Characters other than linefeeds and newlines will
+be interpreted as '1's, including spaces and tabs.
 Be careful with how you structure these files.
 
 Other examples that are tested to work on Linux:
@@ -241,7 +245,7 @@ Note that at least on Linux, you may provide files
 that produce an infinite number of lines, like the
 random device /dev/urandom. Keep in mind you will 
 need to halt the program manually with CTRL+C or
-my killing the ./dfa process. Be careful with the
+by killing the ./dfa process. Be careful with the
 random device, though, or you may end up looking at
 very unfamiliar characters in your terminal (the
 'reset' command is helpful if this happens).
@@ -249,28 +253,24 @@ very unfamiliar characters in your terminal (the
 --------------------
    READING OUTPUT
 --------------------
-Each state transition is output to the console:
+Here is a sample run with typical program output. 
+This information is displayed unless the '-q'
+option is invoked:
 
 $ ./dfa auto_oddNumZeroes.txt 10100
 q0, START? 1, FINAL? 0, ZERO-> q1, ONE-> q0
 q1, START? 0, FINAL? 1, ZERO-> q0, ONE-> q1
-INPUT: 10100
 1: q0 -> q0
 0: q0 -> q1 (F)
 1: q1 -> q1 (F)
 0: q1 -> q0
 0: q0 -> q1 (F)
-ACCEPTED.
+(ACCEPTED)
+     ==>10100
 
-First, the input states are printed for the 
-user's covenience. If this is not wanted, the
-'-q' option can remove any printed output. Know
-that the program returns 0 on a rejected string
-and 1 on an accepted string.
+First, the machine file itself is printed.
 
-Secondly, the INPUT string is displayed..
-
-Thirdly, the transitions made during the machine run
+Second, the transitions made during the machine run
 are output line-by-line. The "(F)" indicates that the 
 latest transition has landed on a FINAL state. Thus, 
 the last line output before a state is ACCEPTED should 
@@ -282,11 +282,11 @@ For example:
 
 ./dfa auto_mysetery.txt 110101 -a500 -r40
 
-will delay the output for 500 milliseconds on an
-accepted string or delay 40 milliseconds on a 
-rejected string. Both options allow for scripts/
-batch operations using this program to slow down
-sufficiently to be observed.
+These options will delay the output for 500 
+milliseconds on an accepted string or delay 40 
+milliseconds on a rejected string. Both options allow 
+for scripts/batch operations using this program to slow 
+down sufficiently to be observed more slowly.
 
-LAST MODIFIED: 23-02-08
+LAST MODIFIED: 23-02-14
 CREATION DATE: 15-02-09
