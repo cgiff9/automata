@@ -73,7 +73,7 @@ option will be ignored.
 The machine file contains a list of states with one
 state per line. It may contain commented lines starting
 with the hash '#' character, but lines containing states
-may not contain the '#' character. Blank lines are ignored.
+may not contain any comments. Blank lines are ignored.
 
 The supplied machine file must follow a specific
 format. For instance, the file "oddNumberZeroes.txt"
