@@ -34,28 +34,28 @@ certain special characters other than 0 and 1.
    MACHINE CONSTANTS
 -----------------------
 If you are getting undefined behavior when running
-your states file, and you're certain of its correctness,
+your machine file, and you're certain of its correctness,
 please observe the top of the file "dfa.c" and adjust
 the three values defined under the "MACHINE CONSTANTS"
 comment. 
 
-Because this program was written in C, there are
-certain bounds that must be manually set in the
-source code. The current restrictions are:
+There are certain bounds that may need to be manually 
+set in the source code. The current restriction (and
+its default value) is:
 
-INPUT STRING NUMBER OF BITS:    10,000
-NUMBER OF STATES:               200
-STATE NAME CHARACTER LIMIT:     50
+STATE NAME CHARACTER LIMIT: 50
 
-These three constants (C Macro definitions)
-are called, respectively:
-   INPUT_STRING_MAX
-   STATES_MAX
-   STATE_NAME_MAX
+This constant (C Macro definition) governs the maximum
+number of characters in a state's name and is called:
+	STATE_NAME_MAX
 
-Please keep in mind the INPUT_STRING_MAX definition
-only applies to input strings supplied by file with
-the '-f' directive, which is described further below.
+There are other less critical definitions which define
+the default sleep value for printed output upon accepted
+and rejected strings. These defaults are triggered when 
+the argument to the '-a' or '-r' paramter is 0:
+
+	SLEEP_ACCEPT_MSEC: 1000
+	SLEEP_REJECT_MSEC: 100
 
 ----------------
    PARAMETERS
@@ -88,23 +88,28 @@ via the command line always overrides the '-f' option.
 The input string can be supplied directly as a
 command line argument as shown below:
 
-$./dfa <states file> <input string>
+$./dfa <machine file> <input string>
 $./dfa oddNumberZeroes.txt 10001010
 
 The input string can also be supplied in a single-
 line file containing the input string:
 
-$./dfa <states file> -f <input string file>
+$./dfa <machine file> -f <input string file>
 $./dfa oddNumberZeroes.txt -f input_test_string.txt
 
 Not that if an input string is supplied via the command-
 line while also invoking the '-f' option, then the '-f'
 option will be ignored.
 
-------------------------
-   STATES FILE FORMAT
-------------------------
-The supplied states file must follow a specific
+-------------------------
+   MACHINE FILE FORMAT
+-------------------------
+The machine file contains a list of states with one
+state per line. It may contain commented lines starting
+with the hash '#' character, but lines containing states
+may not contain the '#' character. Blank lines are ignored.
+
+The supplied machine file must follow a specific
 format. For instance, the file "oddNumberZeroes.txt"
 may contain:
 
@@ -114,23 +119,25 @@ may contain:
 Each line corresponds to a distinct state which
 contains the following information:
 -------------------------------------------------
-[i]    : Array location (index) of this state
+[n]    : Machine index of this state
 NAME   : Provide non-spaced name for state
 START* : 1 if this is the start state, else 0
 FINAL  : 1 if this is a final state, else 0
-ZERO   : Upon reading '0', go to the given array index
-ONE    : Upon reading '1', go to the given array index
+ZERO   : Upon reading '0', go to the machine index n
+ONE    : Upon reading '1', go to the machine index n
 -------------------------------------------------
 *One and only one START state must exist.
 
 For example, in the "oddNumberZeroes.txt" file, the
 first line tells us that there is a state named "q0",
-which is the START state, but is not the FINAL state.
+which is the START state, but is not the FINAL state:
+
 If "q0" reads a '0', it goes to "q1".
 If "q0" reads a '1', it goes to "q0" (back to itself).
 
 The second line tells us that there is a state named
-"q1", which is a FINAL state. 
+"q1", which is a FINAL state:
+
 If "q1" reads a '0', it goes to "q0".
 If "q1" reads a '1', it goes to "q1" (back to itself).
 
@@ -279,7 +286,7 @@ There is one more script which could be used by
 "tm.sh" called "genbits.sh" which creates strings
 with a potentially limited number of ones and a
 potentially massive number of zeroes. I'll let you
-figure out which states files such script may be
+figure out which machine files such script may be
 useful for. ;)
 
 You are always free to write your own

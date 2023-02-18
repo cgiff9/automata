@@ -7,18 +7,14 @@
 #include <time.h>
 #include <signal.h>
 
-// MACHINE CONSTANTS
-// Change the following three values as you see fit.
+// MACHINE CONSTANT(S)
+// Change the following values as you see fit.
 // Just remember to re-compile this dfa
 // program when you change these constants:
 
-#define INPUT_STRING_MAX 10000		// applies only to input strings supplied by file (-f argument)
-#define STATES_MAX 200				// undefined behavior for less than 46 states
 #define STATE_NAME_MAX 50			// undefined behavior for less than 2 characters
-
-// OTHER CONSTANTS
-#define SLEEP_ACCEPT_MSEC 1000
-#define SLEEP_REJECT_MSEC 100
+#define SLEEP_ACCEPT_MSEC 1000		// default when argument '-a 0'
+#define SLEEP_REJECT_MSEC 100		// default when argument '-r 0'
 
 int flag_verbose = 1;
 int sleep_accept_msec = -1;
@@ -104,15 +100,32 @@ void State_print(struct State *state)
 void States_destroy(struct State **states, int len)
 {
 	int i;
-	printf ("Closing machine %s: {%s...", machine_file, states[0]->name);
+	(flag_verbose) && printf ("Closing machine %s: {%s...", machine_file, states[0]->name);
 	State_destroy(states[0]);
 	for (i = 1; i < len-1; i++) {
 		//printf("Destroying state %s...\n", states[i]->name);
 		State_destroy(states[i]);
 	}
-	printf ("%s}\n", states[len-1]->name);
+	(flag_verbose) && printf ("%s}\n", states[len-1]->name);
 	State_destroy(states[len-1]);
 
+}
+
+// Used on machine file import
+void strip_extra_spaces(char* str) {
+	int i, x;
+	for(i=x=0; str[i]; ++i)
+		if(!isspace(str[i]) || (i > 0 && !isspace(str[i-1])))
+			str[x++] = str[i];
+	str[x] = '\0';
+}
+
+int is_empty(const char *s) {
+	while (*s != '\0') {
+		if (!isspace((unsigned char)*s)) return 0;
+    	s++;
+	}
+	return 1;
 }
 
 static volatile int keep_running=1;
@@ -260,11 +273,12 @@ int main (int argc, char **argv)
 	// return 0;
 	*/
 
-	if (input_string_file && input_string) 
-	{
+	if (input_string_file && input_string) {
 		(flag_verbose) && printf ("Input string file ignored due to prescence of direct input string.\n");
+	} else if (!input_string_file && !input_string) {
+		fprintf(stderr, "No input string supplied. Supply via command-line for via file with '-f' paramter\n");
+		return 1;
 	}
-
 
 	// OPEN MACHINE FILE
 	FILE *machine_fp;
@@ -276,37 +290,73 @@ int main (int argc, char **argv)
 		}
 	}
 
-	// READ STATES FROM FILE
-	char s_name[STATES_MAX][STATE_NAME_MAX];
-	int s_start[STATES_MAX], s_final[STATES_MAX], s_zero[STATES_MAX], s_one[STATES_MAX];
-
-	//int num_states = 0;
-	int s_indexes[STATES_MAX];
-	char state_strings[STATES_MAX];
-	for (num_states = 0; fgets(state_strings, STATES_MAX, machine_fp); num_states++) {
-		int pos;
-		if (sscanf(state_strings, 
-					"[%d] NAME %s START %d FINAL %d ZERO %d ONE %d%n", 
-					&s_indexes[num_states], 
-					s_name[num_states], 
-					&s_start[num_states], 
-					&s_final[num_states],
-					&s_zero[num_states],
-					&s_one[num_states],
-					&pos) != 6 || pos != strlen(state_strings) - 1) 
-		{
-			fprintf(stderr, "Error parsing machine file %s\n"
-					"Maximum allowable states is %d.\n"
-					"Please adjust the STATES_MAX definition in dfa.c and recompile if you need more states.\n",
-					machine_file, STATES_MAX);
-
-			return 4;
-		} 
+	// DETERMINE NUMBER OF STATES IN MACHINE FILE
+	// MACHINE FILE ERROR HANDLING
+	char *line = NULL;
+	size_t linelen = 0;
+	int num_lines = 0;
+	int scanned;
+	while( getline(&line, &linelen, machine_fp) > 0 ) {
+		num_lines++;
+		printf("[<0]: %s\n", line);
+		strip_extra_spaces(line);
+		printf("[>0]: %s\n", line);
+		
+		int d_index, d_start, d_final, d_zero, d_one = 0;
+		char d_name[STATE_NAME_MAX];
+		scanned = sscanf(line, "[%d] NAME %s START %d FINAL %d ZERO %d ONE %d",
+					&d_index, d_name, &d_start, &d_final, &d_zero, &d_one);
+		if (scanned == 6) {
+			num_states=num_states+1;
+		/* // Machinefile parser debugging
+		} else if (scanned == -1 && is_empty(line)) {
+			printf("Found empty line at line %d\n", num_lines);
+		} else if (scanned == 0 && line[0] == '#') {
+			printf("Found commented line at line %d\n", num_lines);
+		} else {
+			*/
+		// Allow blank and commented (#) lines
+		} else if ( !(scanned == -1 && is_empty(line)) && !(scanned == 0 && line[0] == '#')) {
+			line[strcspn(line, "\r\n")] = 0;
+			fprintf(stderr, "Error importing state on line %d:\n%s\n", num_lines, line);
+			return 3;
+		}
 	}
+	(flag_verbose) && printf("Machine file %s contains %d legal states.\n", machine_file, num_states);
+	fseek(machine_fp, 0, SEEK_SET);
 
+	// PARSE STATES FROM MACHINE FILE INTO ARRAYS
+	char s_name[num_states][STATE_NAME_MAX];
+	int s_start[num_states], s_final[num_states], s_zero[num_states], s_one[num_states];
+
+	int s_indexes[num_states];
+	char state_strings[num_states];
+	line = NULL;
+	linelen = 0;
+	num_lines = 0;
+	int i = 0;
+	while( getline(&line, &linelen, machine_fp) > 0 ) {
+		num_lines++;
+		strip_extra_spaces(line);
+		scanned = sscanf(line, "[%d] NAME %s START %d FINAL %d ZERO %d ONE %d",
+					&s_indexes[i], 
+					s_name[i], 
+					&s_start[i], 
+					&s_final[i], 
+					&s_zero[i], 
+					&s_one[i]);
+		if (scanned == 6 ) {
+			i=i+1;
+		// Allow blank and commented (#) lines
+		} else if ( !(scanned == -1 && is_empty(line)) && !(scanned == 0 && line[0] == '#')) {
+			line[strcspn(line, "\r\n")] = 0;
+			fprintf(stderr, "Error importing state on line %d:\n%s\n", num_lines, line);
+			return 3;
+		}
+	}
 	fclose(machine_fp);
 
-	/* DEBUGGING STATE ARRAY vs. STATE INDEXES
+	/* // DEBUGGING STATE ARRAY vs. MACHINE FILE STATE INDEXES
 	for (int k=0; k < num_states; k++) {
 		printf ("state_indexes[%d] = %d\n", k, s_indexes[k]);
 	}
@@ -321,15 +371,11 @@ int main (int argc, char **argv)
 			}
 		}
 	}
-	//return 0;
-
-		//printf("Number of states: %d\n", num_states);
-		
 
 	// ENSURE LEGAL NUMBER OF START AND END STATES
 	int starts = 0;
 	int finals = 0;
-	int i = 0;
+	//int i = 0;
 	for (i = 0; i < num_states; i++) {
 		if (s_start[i]) { 
 			starts += 1;
@@ -383,38 +429,9 @@ int main (int argc, char **argv)
 		state_index = s_indexes[i+1];
 	}
 
-	/*
 	if (input_string_file && !input_string)
 	{
-		(flag_verbose) && printf ("Reading input string from file %s:\n", input_string_file);
-
-		FILE *input_string_fp;
-		char input_string_bits[INPUT_STRING_MAX];
-
-		input_string_fp = fopen(input_string_file, "r");
-		if (input_string_fp == NULL) {
-			fprintf(stderr, "Error opening %s\n", input_string_file);
-			return 3;
-		}
-
-		fgets(input_string_bits, INPUT_STRING_MAX, input_string_fp);
-		input_string = input_string_bits;
-		fclose(input_string_fp);
-
-		// Remove newline from input string
-		//size_t ln = strlen(input_string) - 1;
-		//if (input_string[ln] == '\n') input_string[ln] = '\0';
-		input_string[strcspn(input_string, "\r\n")] = 0;
-
-	} else {
-		(flag_verbose) && printf("Reading input string directly from command line:\n");
-	}
-
-	(flag_verbose) && printf ("\t==>%s\n",input_string);
-	*/
-
-	if (input_string_file && !input_string)
-	{
+		// READ INPUT STRING(S) FROM FILE
 		FILE *input_string_fp;
 		char *input_string_bits = NULL;
 		size_t len = 0;
