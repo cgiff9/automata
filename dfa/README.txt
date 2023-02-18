@@ -76,8 +76,8 @@ with the hash '#' character, but lines containing states
 may not contain any comments. Blank lines are ignored.
 
 The supplied machine file must follow a specific
-format. For instance, the file "oddNumberZeroes.txt"
-may contain:
+format. For instance, the file "auto_oddNumberZeroes.txt"
+contains:
 
 [0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
 [1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
