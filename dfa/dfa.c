@@ -298,9 +298,9 @@ int main (int argc, char **argv)
 	int scanned;
 	while( getline(&line, &linelen, machine_fp) > 0 ) {
 		num_lines++;
-		printf("[<0]: %s\n", line);
+		//printf("[<0]: %s\n", line);
 		strip_extra_spaces(line);
-		printf("[>0]: %s\n", line);
+		//printf("[>0]: %s\n", line);
 		
 		int d_index, d_start, d_final, d_zero, d_one = 0;
 		char d_name[STATE_NAME_MAX];
