@@ -1,16 +1,3 @@
-----------------
-   DISCLAIMER
-----------------
-This may be more of a Turing Machine than
-simply a deterministic finite automaton. I may need
-to refresh my computing fundamentals to know for sure.
-Either way, enjoy! :)
-
---------------
-   BUILDING
---------------
-cd automata/dfa
-make dfa
 
 ----------------------------
 ----------------------------
@@ -30,32 +17,11 @@ sequence "10". Please be aware of your shell's
 quirks when supplying input strings that contain
 certain special characters other than 0 and 1.
 
------------------------
-   MACHINE CONSTANTS
------------------------
-If you are getting undefined behavior when running
-your machine file, and you're certain of its correctness,
-please observe the top of the file "dfa.c" and adjust
-the three values defined under the "MACHINE CONSTANTS"
-comment. 
-
-There are certain bounds that may need to be manually 
-set in the source code. The current restriction (and
-its default value) is:
-
-STATE NAME CHARACTER LIMIT: 50
-
-This constant (C Macro definition) governs the maximum
-number of characters in a state's name and is called:
-	STATE_NAME_MAX
-
-There are other less critical definitions which define
-the default sleep value for printed output upon accepted
-and rejected strings. These defaults are triggered when 
-the argument to the '-a' or '-r' paramter is 0:
-
-	SLEEP_ACCEPT_MSEC: 1000
-	SLEEP_REJECT_MSEC: 100
+--------------
+   BUILDING
+--------------
+cd automata/dfa
+make dfa
 
 ----------------
    PARAMETERS
@@ -266,6 +232,33 @@ milliseconds on a rejected string. Both options allow
 for scripts/batch operations using this program to slow 
 down sufficiently to be observed more slowly.
 
+-----------------------
+   MACHINE CONSTANTS
+-----------------------
+If you are getting undefined behavior when running
+your machine file, and you're certain of its correctness,
+please observe the top of the file "dfa.c" and adjust
+the three values defined under the "MACHINE CONSTANTS"
+comment. 
+
+There are certain bounds that may need to be manually 
+set in the source code. The current restriction (and
+its default value) is:
+
+STATE NAME CHARACTER LIMIT: 50
+
+This constant (C Macro definition) governs the maximum
+number of characters in a state's name and is called:
+	STATE_NAME_MAX
+
+There are other less critical definitions which define
+the default sleep value for printed output upon accepted
+and rejected strings. These defaults are triggered when 
+the argument to the '-a' or '-r' paramter is 0:
+
+	SLEEP_ACCEPT_MSEC: 1000
+	SLEEP_REJECT_MSEC: 100
+
 ----------------------
    OPTIONAL SCRIPTS
 ----------------------
@@ -300,5 +293,5 @@ become essentially obsoleted to a degree.
 Again, enjoy the program:)
 
 
-LAST MODIFIED: 23-02-14
+LAST MODIFIED: 23-02-18
 CREATION DATE: 15-02-09
