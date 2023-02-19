@@ -28,6 +28,7 @@ make dfa
 ----------------
 -q           quiet; turn off printout and delays
              *program returns 1 on accept, 0 on reject
+-s           convert input to ascii binary representation
 -a <num>     delay printout on string accept by 'num' ms
 -r <num>     delay printout on string reject by 'num' ms
 -f <file>    input string file

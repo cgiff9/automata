@@ -17,6 +17,7 @@
 #define SLEEP_REJECT_MSEC 100		// default when argument '-r 0'
 
 int flag_verbose = 1;
+int flag_string = 0;
 int sleep_accept_msec = -1;
 int sleep_reject_msec = -1;
 char *input_string=NULL;
@@ -56,6 +57,30 @@ char* print_date()
 	strftime(datebuf,80,"%x %H:%M:%S", info);
 	(flag_verbose) && printf("         %s\n", datebuf);
 	return datebuf;
+}
+
+char* string_to_bin(char* s) {
+	if(s == NULL) return 0; /* no input string */
+	size_t len = strlen(s);
+	char *binary = malloc(len*8 + 1); // each char is one byte (8 bits) and + 1 at the end for null terminator
+	binary[0] = '\0';
+	for(size_t i = 0; i < len; ++i) {
+		char ch = s[i];
+		for(int j = 7; j >= 0; --j){
+			if(ch & (1 << j)) {
+				strcat(binary,"1");
+			} else {
+				strcat(binary,"0");
+			}
+		}
+	}
+	
+	// trim leading zeroes
+	int n;
+	if ((n = strspn(binary, "0")) != 0 && binary[n] != '\0') {        
+        return &binary[n];
+    }
+	return binary;
 }
 
 struct State{
@@ -219,12 +244,15 @@ int main (int argc, char **argv)
 	opterr = 0;
 
 	int nonopt_index=0;	
-	while ((opt = getopt (argc, argv, "-:qa:r:f:o:")) != -1)
+	while ((opt = getopt (argc, argv, "-:qsa:r:f:o:")) != -1)
 	{
 		switch (opt)
 		{
 			case 'q':
 				flag_verbose = 0;
+				break;
+			case 's':
+				flag_string = 1;
 				break;
 			case 'a':
 				sleep_accept_msec = atoi(optarg);
@@ -263,6 +291,7 @@ int main (int argc, char **argv)
 	/*
 	// PARAMTER DEBUGGING
 	printf ("\t(-q)  flag_verbose = %d\n"
+	"\t(-s)  flag_string = %d\n"
 	"\t(-a*)  sleep_accept_msec = %d\n"
 	"\t(-r*)  sleep_reject_msec = %d\n"
 	"\t(-f*) input_string_file = %s\n"
@@ -447,7 +476,11 @@ int main (int argc, char **argv)
 		{
 			input_string = input_string_bits;
 			input_string[strcspn(input_string, "\r\n")] = 0;
-			
+		
+			if (flag_string) {
+				char *input_ascii = string_to_bin(input_string);
+				input_string = input_ascii;
+			}
 			dfa_run();
 			signal(SIGINT, int_handler);
 			while(!keep_running) {
@@ -459,6 +492,10 @@ int main (int argc, char **argv)
 		fclose(input_string_fp);
 
 	} else {
+		if (flag_string) {
+			char *input_ascii = string_to_bin(input_string);
+			input_string = input_ascii;
+		}
 		dfa_run();
 	}
 
