@@ -153,11 +153,13 @@ int is_empty(const char *s) {
 	return 1;
 }
 
+/*
 static volatile int keep_running=1;
 void int_handler(int dummy)
 {
 	keep_running = 0;
 }
+*/
 
 // INITIALIZE FIRST STATE
 struct State *state;
@@ -482,12 +484,15 @@ int main (int argc, char **argv)
 				input_string = input_ascii;
 			}
 			dfa_run();
+			
+			/*
 			signal(SIGINT, int_handler);
 			while(!keep_running) {
 				fclose(input_string_fp);
 				States_destroy(states, num_states);
 				return 0;
 			}
+			*/
 		}
 		fclose(input_string_fp);
 
