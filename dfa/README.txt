@@ -80,18 +80,17 @@ The supplied machine file must follow a specific
 format. For instance, the file "auto_oddNumberZeroes.txt"
 contains:
 
-[0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
-[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
+NAME q0 START 1 FINAL 0 ZERO q1 ONE q0
+NAME q1 START 0 FINAL 1 ZERO q0 ONE q1
 
 Each line corresponds to a distinct state which
 contains the following information:
 -------------------------------------------------
-[n]    : Machine index of this state
 NAME   : Provide non-spaced name for state
 START* : 1 if this is the start state, else 0
 FINAL  : 1 if this is a final state, else 0
-ZERO   : Upon reading '0', go to the machine index n
-ONE    : Upon reading '1', go to the machine index n
+ZERO   : Upon reading '0', go to state name
+ONE    : Upon reading '1', go to state name
 -------------------------------------------------
 *One and only one START state must exist.
 
@@ -111,40 +110,9 @@ If "q1" reads a '1', it goes to "q1" (back to itself).
 Note that there is only one START bit set to 1. One 
 and only one state must have a START bit of 1.
 
-The numbers inside the brackets [num] are indexes of
-the state described by the particular line. These
-indexes are used by ZERO and ONE to describe the
-transition function of the state.
-
-The indexes do not need to be in numerical order. This
-may help for particularly complex machines where it may
-be logical/visually necessarily to insert a new 
-state between two others. For instance, the four 
-machine files:
-
-[0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
-[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
-
-and
-
-[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
-[0] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
-
-and
-
-[1] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
-[0] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
-
-and 
-
-[100] NAME q0 START 1 FINAL 0 ZERO 1 ONE 0
-[1] NAME q1 START 0 FINAL 1 ZERO 0 ONE 1
-
-...are all logically equivalent.
-
-Take care not to use the same index for two
+Take care not to use the same name for two
 states, or the machine will complain about
-the duplicate indexes.
+the duplicates.
 
 ------------------------------
    INPUT STRING FILE FORMAT
@@ -260,39 +228,5 @@ the argument to the '-a' or '-r' paramter is 0:
 	SLEEP_ACCEPT_MSEC: 1000
 	SLEEP_REJECT_MSEC: 100
 
-----------------------
-   OPTIONAL SCRIPTS
-----------------------
-There are two scripts:
-tm.sh
-ttm.sh
-
-They help automate the running of the dfa program
-over random input strings. You may find them useful
-or cumbersome. These scripts were created in the 
-bash shell on linux, and the "ttm.sh" script uses
-the "screen" command to create multiple instances
-of the "tm.sh" script. But hey, who am I to remind
-the intelligent user of the need to read scripts
-before running them? ;P
-
-There is one more script which could be used by
-"tm.sh" called "genbits.sh" which creates strings
-with a potentially limited number of ones and a
-potentially massive number of zeroes. I'll let you
-figure out which machine files such script may be
-useful for. ;)
-
-You are always free to write your own
-scripts to automate the creation of input strings
-and/or run the machine multiple times. 
-
-Keep in mind that with new functionalities being
-introduced to the dfa program, these scripts may
-become essentially obsoleted to a degree.
-
-Again, enjoy the program:)
 
 
-LAST MODIFIED: 23-02-18
-CREATION DATE: 15-02-09

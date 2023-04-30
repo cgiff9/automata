@@ -124,15 +124,10 @@ void State_print(struct State *state)
 // Destroying an array of states of a given length
 void States_destroy(struct State **states, int len)
 {
-	int i;
-	(flag_verbose) && printf ("Closing machine %s: {%s...", machine_file, states[0]->name);
-	State_destroy(states[0]);
-	for (i = 1; i < len-1; i++) {
-		//printf("Destroying state %s...\n", states[i]->name);
+	for (int i = 0; i < len; i++) {
 		State_destroy(states[i]);
 	}
-	(flag_verbose) && printf ("%s}\n", states[len-1]->name);
-	State_destroy(states[len-1]);
+	//(flag_verbose) && printf("Closed machine %s\n", machine_file);
 
 }
 
@@ -242,9 +237,7 @@ int main (int argc, char **argv)
 
 	int index;
 	int opt;
-
 	opterr = 0;
-
 	int nonopt_index=0;	
 	while ((opt = getopt (argc, argv, "-:qsa:r:f:o:")) != -1)
 	{
@@ -329,15 +322,13 @@ int main (int argc, char **argv)
 	int scanned;
 	while( getline(&line, &linelen, machine_fp) > 0 ) {
 		num_lines++;
-		//printf("[<0]: %s\n", line);
 		strip_extra_spaces(line);
-		//printf("[>0]: %s\n", line);
 		
-		int d_index, d_start, d_final, d_zero, d_one = 0;
-		char d_name[STATE_NAME_MAX];
-		scanned = sscanf(line, "[%d] NAME %s START %d FINAL %d ZERO %d ONE %d",
-					&d_index, d_name, &d_start, &d_final, &d_zero, &d_one);
-		if (scanned == 6) {
+		int d_start, d_final;
+		char d_name[STATE_NAME_MAX], d_zero[STATE_NAME_MAX], d_one[STATE_NAME_MAX];
+		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s",
+					d_name, &d_start, &d_final, &d_zero, &d_one);
+		if (scanned == 5) {
 			num_states=num_states+1;
 		/* // Machinefile parser debugging
 		} else if (scanned == -1 && is_empty(line)) {
@@ -357,10 +348,11 @@ int main (int argc, char **argv)
 	fseek(machine_fp, 0, SEEK_SET);
 
 	// PARSE STATES FROM MACHINE FILE INTO ARRAYS
-	char s_name[num_states][STATE_NAME_MAX];
-	int s_start[num_states], s_final[num_states], s_zero[num_states], s_one[num_states];
+	char s_name[num_states][STATE_NAME_MAX], 
+		 s_zero[num_states][STATE_NAME_MAX], 
+		 s_one[num_states][STATE_NAME_MAX];
+	int s_start[num_states], s_final[num_states], s_zero_indexes[num_states], s_one_indexes[num_states];
 
-	int s_indexes[num_states];
 	char state_strings[num_states];
 	line = NULL;
 	linelen = 0;
@@ -369,14 +361,13 @@ int main (int argc, char **argv)
 	while( getline(&line, &linelen, machine_fp) > 0 ) {
 		num_lines++;
 		strip_extra_spaces(line);
-		scanned = sscanf(line, "[%d] NAME %s START %d FINAL %d ZERO %d ONE %d",
-					&s_indexes[i], 
+		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s",
 					s_name[i], 
 					&s_start[i], 
 					&s_final[i], 
 					&s_zero[i], 
 					&s_one[i]);
-		if (scanned == 6 ) {
+		if (scanned == 5 ) {
 			i=i+1;
 		// Allow blank and commented (#) lines
 		} else if ( !(scanned == -1 && is_empty(line)) && !(scanned == 0 && line[0] == '#')) {
@@ -393,11 +384,11 @@ int main (int argc, char **argv)
 	}
 	*/
 
-	// Ensure indexes in machine file are unique
+	// Ensure states have unique names
 	for (int i=0; i < num_states; i++) {
 		for (int j=0; j < num_states; j++) {
-			if (s_indexes[i] == s_indexes[j] && i != j) {
-				fprintf(stderr, "Duplicate indexes detected in machine file: [%d]\n", s_indexes[i]);
+			if (!(strcmp(s_name[i], s_name[j])) && i != j) {
+				fprintf(stderr, "Duplicate state names detected in machine file: [%s]\n", s_name[i]);
 				return 4;
 			}
 		}
@@ -430,34 +421,36 @@ int main (int argc, char **argv)
 	// CREATE ARRAY OF STATES
 	struct State *states[num_states];
 
-	// INITIALIZE FIRST STATE
-	//struct State *state;
-
 	// FILL ARRAY WITH STATE NAMES, START, FINAL
-	int state_index = s_indexes[0];
 	for (i = 0; i < num_states; i++) {
 		struct State *new_state = State_create(s_name[i], 
 				s_start[i], 
 				s_final[i]);
-		states[state_index] = new_state;
+		states[i] = new_state;
 
 		// Set start state
-		//if (new_state->start) state = new_state;
 		if (new_state->start) state_start = new_state;
+	}
 
-		state_index = s_indexes[i+1];
+	// MATCH TRANSITION STRINGS WITH STATE INDEXES
+	for (i = 0; i < num_states; i++) {
+		char *state_zero = s_zero[i];
+		char *state_one = s_one[i];
+		int j;
+		for (j = 0; strcmp(state_zero, states[j]->name); j++);
+		s_zero_indexes[i]=j;			
+		for (j = 0; strcmp(state_one, states[j]->name); j++);
+		s_one_indexes[i]=j;			
 	}
 
 	// FILL ARRAY WITH TRANSITIONS
-	state_index = s_indexes[0];
 	for (i = 0; i < num_states; i++) {
-		states[state_index]->zero = states[s_zero[i]];
-		states[state_index]->one = states[s_one[i]];
+		states[i]->zero = states[s_zero_indexes[i]];
+		states[i]->one = states[s_one_indexes[i]];
 
 		// Print states to console
 		if (flag_verbose) State_print(states[i]);
 
-		state_index = s_indexes[i+1];
 	}
 
 	if (input_string_file && !input_string)
