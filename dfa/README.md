@@ -97,17 +97,14 @@ For example, in the "oddNumberZeroes.txt" file, the
 first line tells us that there is a state named "q0",
 which is the START state, but is not the FINAL state:
 
-If "q0" reads a '0', it goes to "q1".
+If "q0" reads a '0', it goes to "q1".___
 If "q0" reads a '1', it goes to "q0" (back to itself).
 
 The second line tells us that there is a state named
 "q1", which is a FINAL state:
 
-If "q1" reads a '0', it goes to "q0".
+If "q1" reads a '0', it goes to "q0".___
 If "q1" reads a '1', it goes to "q1" (back to itself).
-
-Note that there is only one START bit set to 1. One 
-and only one state must have a START bit of 1.
 
 Take care not to use the same name for two
 states, or the machine will complain about
@@ -115,11 +112,10 @@ the duplicates.
 
 INPUT STRING FILE FORMAT
 ------------------------------
-If an input string file is used, ie.:
-    '-f input_test_string.txt' 
-then it may contain an uninterrupted string 
-of '0's and '1's. For example, the input file 
-called  "input_test_string.txt" looks like this:
+If an input string file is used, then it may contain 
+an uninterrupted string of '0's and '1's. For example, 
+the input file  called  "input_test_string.txt" looks 
+like this:
 
 ```
 111010000101010100010101111100000001010111
@@ -161,10 +157,7 @@ Note that at least on Linux, you may provide files
 that produce an infinite number of lines, like the
 random device /dev/urandom. Keep in mind you will 
 need to halt the program manually with CTRL+C or
-by killing the ./dfa process. Be careful with the
-random device, though, or you may end up looking at
-very unfamiliar characters in your terminal (the
-'reset' command is helpful if this happens).
+by killing the ./dfa process.
 
 READING OUTPUT
 --------------------
@@ -192,7 +185,7 @@ latest transition has landed on a FINAL state. Thus,
 the last line output before a state is ACCEPTED should 
 end with "(F)", provided there are no bugs!
 
-Optional delay paramters can be used to pause the
+Optional delay parameters can be used to pause the
 output on an accepted state and/or a rejected state.
 For example:
 
