@@ -84,12 +84,14 @@ NAME q1 START 0 FINAL 1 ZERO q0 ONE q1
 ```
 Each line corresponds to a distinct state which
 contains the following information:
+```
 NAME   : Provide non-spaced name for state
 START* : 1 if this is the start state, else 0
 FINAL  : 1 if this is a final state, else 0
 ZERO   : Upon reading '0', go to state name
 ONE    : Upon reading '1', go to state name
 *One and only one START state must exist.
+```
 
 For example, in the "oddNumberZeroes.txt" file, the
 first line tells us that there is a state named "q0",
