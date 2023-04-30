@@ -129,7 +129,6 @@ the 'ENTER/RETURN' button.
 
 Characters other than linefeeds and newlines will
 be interpreted as '1's, including spaces and tabs.
-Be careful with how you structure these files.
 
 Other examples that are tested to work on Linux:
 
@@ -138,7 +137,7 @@ Other examples that are tested to work on Linux:
      input_test_string_multi.txt
 ```
 ```
-./dfa auto_Liouville_contains_5th.txt -f \
+./dfa auto_Liouville_contains_4th.txt -f \
      <(cat /dev/urandom | tr -dc '[:alnum:]' | \
      fold -w 4096 | \
      sed 's/[a-zA-X1-9]/1/g' | \
@@ -182,7 +181,7 @@ Second, the transitions made during the machine run
 are output line-by-line. The "(F)" indicates that the 
 latest transition has landed on a FINAL state. Thus, 
 the last line output before a state is ACCEPTED should 
-end with "(F)", provided there are no bugs!
+end with "(F)".
 
 Optional delay parameters can be used to pause the
 output on an accepted state and/or a rejected state.
