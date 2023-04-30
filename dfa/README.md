@@ -22,7 +22,8 @@ make dfa
 ```
 
 PARAMETERS
-----------------
+----------
+```
 -q           quiet; turn off printout and delays
              *program returns 1 on accept, 0 on reject
 -s           convert input to ascii binary representation
@@ -34,6 +35,7 @@ PARAMETERS
 -o <file>    output accept file
              *date string accepted also output 
              *file is created if it doesn't exist
+```
 
 The machine file and input string are supplied as such:
 ```
@@ -117,7 +119,9 @@ then it may contain an uninterrupted string
 of '0's and '1's. For example, the input file 
 called  "input_test_string.txt" looks like this:
 
+```
 111010000101010100010101111100000001010111
+```
 
 This file may contain multiple strings, with
 one per line. Linefeed and newline characters
@@ -132,22 +136,25 @@ Be careful with how you structure these files.
 
 Other examples that are tested to work on Linux:
 
+```
 ./dfa auto_Liouville_contains_3rd.txt -f \
      input_test_string_multi.txt
-
+```
+```
 ./dfa auto_Liouville_contains_5th.txt -f \
      <(cat /dev/urandom | tr -dc '[:alnum:]' | \
      fold -w 4096 | \
      sed 's/[a-zA-X1-9]/1/g' | \
      tr 01 10)
-
+```
+```
 ./dfa auto_Liouville_contains_3rd.txt -f <(cat <<EOF
 110001
 1010101
 1000101
 EOF
 )
-
+```
 Note that at least on Linux, you may provide files
 that produce an infinite number of lines, like the
 random device /dev/urandom. Keep in mind you will 
@@ -162,7 +169,7 @@ READING OUTPUT
 Here is a sample run with typical program output. 
 This information is displayed unless the '-q'
 option is invoked:
-
+```
 $ ./dfa auto_oddNumZeroes.txt 10100
 q0, START? 1, FINAL? 0, ZERO-> q1, ONE-> q0
 q1, START? 0, FINAL? 1, ZERO-> q0, ONE-> q1
@@ -173,6 +180,7 @@ q1, START? 0, FINAL? 1, ZERO-> q0, ONE-> q1
 0: q0 -> q1 (F)
 (ACCEPTED)
      ==>10100
+```
 
 First, the machine file itself is printed.
 
@@ -186,39 +194,12 @@ Optional delay paramters can be used to pause the
 output on an accepted state and/or a rejected state.
 For example:
 
-./dfa auto_mysetery.txt 110101 -a500 -r40
+```
+./dfa auto_divisibleByThree.txt 110101 -a500 -r40
+```
 
 These options will delay the output for 500 
 milliseconds on an accepted string or delay 40 
 milliseconds on a rejected string. Both options allow 
-for scripts/batch operations using this program to slow 
-down sufficiently to be observed more slowly.
-
-MACHINE CONSTANTS
------------------------
-If you are getting undefined behavior when running
-your machine file, and you're certain of its correctness,
-please observe the top of the file "dfa.c" and adjust
-the three values defined under the "MACHINE CONSTANTS"
-comment. 
-
-There are certain bounds that may need to be manually 
-set in the source code. The current restriction (and
-its default value) is:
-
-STATE NAME CHARACTER LIMIT: 50
-
-This constant (C Macro definition) governs the maximum
-number of characters in a state's name and is called:
-	STATE_NAME_MAX
-
-There are other less critical definitions which define
-the default sleep value for printed output upon accepted
-and rejected strings. These defaults are triggered when 
-the argument to the '-a' or '-r' paramter is 0:
-
-	SLEEP_ACCEPT_MSEC: 1000
-	SLEEP_REJECT_MSEC: 100
-
-
+for delays when reading multi-line input string files.
 
