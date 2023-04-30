@@ -25,16 +25,15 @@ PARAMETERS
 ----------
 ```
 -q           quiet; turn off printout and delays
-             *program returns 1 on accept, 0 on reject
+                *program returns 1 on accept, 0 on reject
 -s           convert input to ascii binary representation
 -a <num>     delay printout on string accept by 'num' ms
 -r <num>     delay printout on string reject by 'num' ms
 -f <file>    input string file
-             *may contain multiple strings, one per line
-             *command-line input string overrides this
+                *may contain multiple strings, one per line
+                *option overridden by command-line input string
 -o <file>    output accept file
-             *date string accepted also output 
-             *file is created if it doesn't exist
+                *file is created if it doesn't exist
 ```
 
 The machine file and input string are supplied as such:
@@ -97,13 +96,13 @@ For example, in the "oddNumberZeroes.txt" file, the
 first line tells us that there is a state named "q0",
 which is the START state, but is not the FINAL state:
 
-If "q0" reads a '0', it goes to "q1".___
+If "q0" reads a '0', it goes to "q1". <br />
 If "q0" reads a '1', it goes to "q0" (back to itself).
 
 The second line tells us that there is a state named
 "q1", which is a FINAL state:
 
-If "q1" reads a '0', it goes to "q0".___
+If "q1" reads a '0', it goes to "q0". <br />
 If "q1" reads a '1', it goes to "q1" (back to itself).
 
 Take care not to use the same name for two
