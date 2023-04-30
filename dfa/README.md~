@@ -16,10 +16,8 @@ certain special characters other than 0 and 1.
 
 BUILDING
 --------------
-```
 cd automata/dfa
 make dfa
-```
 
 PARAMETERS
 ----------------
@@ -36,13 +34,11 @@ PARAMETERS
              *file is created if it doesn't exist
 
 The machine file and input string are supplied as such:
-```
 ./dfa machineFile.txt 10001
-```
+
 Other parameters can be mixed throughout:
-```
 ./dfa -q machineFile.txt -a600 -r100 10001 -o /tmp/acc.txt
-```
+
 Just know that the first "non-option" parameter is always
 the machine file and the 2nd "non-option" paramter is 
 always the input string. The input string supplied directly
@@ -52,16 +48,16 @@ RUNNING THE MACHINE
 -------------------------
 The input string can be supplied directly as a
 command line argument as shown below:
-```
+
 $./dfa <machine file> <input string>
 $./dfa oddNumberZeroes.txt 10001010
-```
+
 The input string can also be supplied in a single-
 line file containing the input string:
-```
+
 $./dfa <machine file> -f <input string file>
 $./dfa oddNumberZeroes.txt -f input_test_string.txt
-```
+
 Not that if an input string is supplied via the command-
 line while also invoking the '-f' option, then the '-f'
 option will be ignored.
@@ -76,10 +72,10 @@ may not contain any comments. Blank lines are ignored.
 The supplied machine file must follow a specific
 format. For instance, the file "auto_oddNumberZeroes.txt"
 contains:
-```
+
 NAME q0 START 1 FINAL 0 ZERO q1 ONE q0
 NAME q1 START 0 FINAL 1 ZERO q0 ONE q1
-```
+
 Each line corresponds to a distinct state which
 contains the following information:
 NAME   : Provide non-spaced name for state
