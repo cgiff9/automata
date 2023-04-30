@@ -1,8 +1,5 @@
 
-----------------------------
-----------------------------
-   README FOR DFA PROGRAM
-----------------------------
+README FOR DFA PROGRAM
 ----------------------------
 This program reads a deterministic finite automaton
 from a supplied "machine file" and runs the automaton 
@@ -17,14 +14,12 @@ sequence "10". Please be aware of your shell's
 quirks when supplying input strings that contain
 certain special characters other than 0 and 1.
 
---------------
-   BUILDING
+BUILDING
 --------------
 cd automata/dfa
 make dfa
 
-----------------
-   PARAMETERS
+PARAMETERS
 ----------------
 -q           quiet; turn off printout and delays
              *program returns 1 on accept, 0 on reject
@@ -49,8 +44,7 @@ the machine file and the 2nd "non-option" paramter is
 always the input string. The input string supplied directly
 via the command line always overrides the '-f' option. 
 
--------------------------
-   RUNNING THE MACHINE
+RUNNING THE MACHINE
 -------------------------
 The input string can be supplied directly as a
 command line argument as shown below:
@@ -68,8 +62,7 @@ Not that if an input string is supplied via the command-
 line while also invoking the '-f' option, then the '-f'
 option will be ignored.
 
--------------------------
-   MACHINE FILE FORMAT
+MACHINE FILE FORMAT
 -------------------------
 The machine file contains a list of states with one
 state per line. It may contain commented lines starting
@@ -114,8 +107,7 @@ Take care not to use the same name for two
 states, or the machine will complain about
 the duplicates.
 
-------------------------------
-   INPUT STRING FILE FORMAT
+INPUT STRING FILE FORMAT
 ------------------------------
 If an input string file is used, ie.:
     '-f input_test_string.txt' 
@@ -163,8 +155,7 @@ random device, though, or you may end up looking at
 very unfamiliar characters in your terminal (the
 'reset' command is helpful if this happens).
 
---------------------
-   READING OUTPUT
+READING OUTPUT
 --------------------
 Here is a sample run with typical program output. 
 This information is displayed unless the '-q'
@@ -201,8 +192,7 @@ milliseconds on a rejected string. Both options allow
 for scripts/batch operations using this program to slow 
 down sufficiently to be observed more slowly.
 
------------------------
-   MACHINE CONSTANTS
+MACHINE CONSTANTS
 -----------------------
 If you are getting undefined behavior when running
 your machine file, and you're certain of its correctness,
