@@ -378,12 +378,6 @@ int main (int argc, char **argv)
 	}
 	fclose(machine_fp);
 
-	/* // DEBUGGING STATE ARRAY vs. MACHINE FILE STATE INDEXES
-	for (int k=0; k < num_states; k++) {
-		printf ("state_indexes[%d] = %d\n", k, s_indexes[k]);
-	}
-	*/
-
 	// Ensure states have unique names
 	for (int i=0; i < num_states; i++) {
 		for (int j=0; j < num_states; j++) {
