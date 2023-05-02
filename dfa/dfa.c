@@ -327,7 +327,7 @@ int main (int argc, char **argv)
 		int d_start, d_final;
 		char d_name[STATE_NAME_MAX], d_zero[STATE_NAME_MAX], d_one[STATE_NAME_MAX];
 		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s",
-					d_name, &d_start, &d_final, &d_zero, &d_one);
+					d_name, &d_start, &d_final, d_zero, d_one);
 		if (scanned == 5) {
 			num_states=num_states+1;
 		/* // Machinefile parser debugging
@@ -365,8 +365,8 @@ int main (int argc, char **argv)
 					s_name[i], 
 					&s_start[i], 
 					&s_final[i], 
-					&s_zero[i], 
-					&s_one[i]);
+					s_zero[i], 
+					s_one[i]);
 		if (scanned == 5 ) {
 			i=i+1;
 		// Allow blank and commented (#) lines
