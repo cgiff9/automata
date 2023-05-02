@@ -1,6 +1,6 @@
 
-README FOR DFA PROGRAM
-----------------------------
+DFA
+===========
 This program reads a deterministic finite automaton
 from a supplied "machine file" and runs the automaton 
 on a supplied input string. Automaton only works
@@ -45,7 +45,7 @@ Other parameters can be mixed throughout:
 ./dfa -q machineFile.txt -a600 -r100 10001 -o /tmp/acc.txt
 ```
 Just know that the first "non-option" parameter is always
-the machine file and the 2nd "non-option" paramter is 
+the machine file and the 2nd "non-option" parameter is 
 always the input string. The input string supplied directly
 via the command line always overrides the '-f' option. 
 
@@ -57,15 +57,15 @@ command line argument as shown below:
 $./dfa <machine file> <input string>
 $./dfa oddNumberZeroes.txt 10001010
 ```
-The input string can also be supplied in a single-
-line file containing the input string:
+The input string can also be supplied in a file containing
+one input string per line.
 ```
 $./dfa <machine file> -f <input string file>
 $./dfa oddNumberZeroes.txt -f input_test_string.txt
 ```
-Not that if an input string is supplied via the command-
-line while also invoking the '-f' option, then the '-f'
-option will be ignored.
+Not that if an input string is supplied via the command-line 
+while also invoking the '-f' option, then the '-f'option 
+will be ignored.
 
 MACHINE FILE FORMAT
 -------------------------
