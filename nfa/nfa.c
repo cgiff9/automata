@@ -85,8 +85,10 @@ char* string_to_bin(char* s) {
 
 struct State{
 	char *name;
-	struct State *zero;
-	struct State *one;
+	struct State **zero;
+	struct State **one;
+	struct State **empty;
+	int zero_len, one_len, empty_len;
 	int start;
 	int final;
 };
@@ -102,10 +104,54 @@ struct State *State_create(char *name, int start, int final)
 
 	// Every state defaults to returning to itself
 	// upon a '0' and a '1'
-	state->zero = state;
-	state->one = state;
+	state->zero = malloc(sizeof(struct State *));
+	state->one = malloc(sizeof(struct State *));
+	state->empty = malloc(sizeof(struct State *));
+	
+	state->zero_len = 0;
+	state->one_len = 0;
+	state->empty_len = 0;
+
+	state->zero[0] = NULL;
+	state->one[0] = NULL;
+	state->empty[0] = NULL;
 
 	return state;
+}
+
+void State_transition_add(int symbol, struct State *from, struct State *to)
+{
+	if (symbol == 0) {
+	if (from->zero_len == 0) {
+		from->zero[0] = to;
+		from->zero_len++;
+	} else {
+		from->zero_len++;
+		from->zero = realloc(from->zero, sizeof(struct State *) * from->zero_len);
+		from->zero[from->zero_len-1]=to;
+	}
+	}
+	if (symbol == 1) {
+	if (from->one_len == 0) {
+		from->one[0] = to;
+		from->one_len++;
+	} else {
+		from->one_len++;
+		from->one = realloc(from->one, sizeof(struct State *) * from->one_len);
+		from->one[from->one_len-1]=to;
+	}
+	}
+	if (symbol == 2) {
+	if (from->empty_len == 0) {
+		from->empty[0] = to;
+		from->empty_len++;
+	} else {
+		from->empty_len++;
+		from->empty = realloc(from->empty, sizeof(struct State *) * from->empty_len);
+		from->empty[from->empty_len-1]=to;
+	}
+	}
+
 }
 
 void State_destroy(struct State *state)
@@ -116,9 +162,21 @@ void State_destroy(struct State *state)
 
 void State_print(struct State *state)
 {
-	printf("%s, START? %d, FINAL? %d, ZERO-> %s, ONE-> %s\n", 
-			state->name, state->start, state->final, 
-			state->zero->name, state->one->name);
+	printf("%s, START? %d, FINAL? %d, ZERO-> ", 
+			state->name, state->start, state->final);
+	int i;
+	for (int i = 0; i < state->zero_len; i++) {
+		printf("%s,", state->zero[i]->name);
+	}
+	printf(" ONE-> ");
+	for (int i = 0; i < state->one_len; i++) {
+		printf("%s,", state->one[i]->name);
+	}
+	printf(" EMPTY-> ");
+	for (int i = 0; i < state->empty_len; i++) {
+		printf("%s,", state->empty[i]->name);
+	}
+	printf("\n");
 }
 
 // Destroying an array of states of a given length
@@ -162,32 +220,50 @@ struct State *state_start;
 
 int num_states = 0;
 char *output_accept_file = NULL;
-int dfa_run()
+int accepted = 0;
+int rejected = 0;
+int nfa_run(char *run_input_string, struct State *run_state)
 {
-	// SET START STATE
-	//state=state_start;
-
 	// RUN MACHINE
-	for (int i = 0; input_string[i] != '\0'; i++) {
-		(flag_verbose) && printf("%c: %s -> ", input_string[i], state->name);
-		if (input_string[i] == '0') {
-			state = state->zero;
-	//} else if (input_string[i] == '1') {
-	//	state = state->one;
-	} else {
-		state = state->one;
+	if (run_state->final==1 && run_input_string[0] == '\0' ) {
+		accepted = 1;
+	} else if (run_state->empty[0] != NULL) {
+		for (int j = 0; j < run_state->empty_len; j++) {
+			(flag_verbose) && printf("[E]%.20s: %s -> %s", run_input_string,
+					run_state->name,run_state->empty[j]->name);
+			if (flag_verbose) {
+				if (run_state->empty[j]->final) printf(" (F)\n"); else printf("\n");
+			}
+			nfa_run(run_input_string, run_state->empty[j]);
+		}
 	}
+	if (run_input_string[0] == '0') {
+		for (int j = 0; j < run_state->zero_len; j++) {
+			(flag_verbose) && printf("[%c]%.20s: %s -> %s", run_input_string[0], run_input_string+1, 
+					run_state->name,run_state->zero[j]->name);
+			if (flag_verbose) {
+				if (run_state->zero[j]->final) printf(" (F)\n"); else printf("\n");
+			}
+			nfa_run(run_input_string+1, run_state->zero[j]);
+		}
+	} else if (run_input_string[0] == '1') {
+		for (int j = 0; j < run_state->one_len; j++) {
+			(flag_verbose) && printf("[%c]%.20s: %s -> %s", run_input_string[0], run_input_string+1,
+					run_state->name,run_state->one[j]->name);
+			if (flag_verbose) {
+				if (run_state->one[j]->final) printf(" (F)\n"); else printf("\n");
+			}
+			nfa_run(run_input_string+1, run_state->one[j]);
+		}
+	}
+}
 
-	// Finish printing current transition
-	(flag_verbose) && printf("%s", state->name);
-	if (state->final)
-		(flag_verbose) && printf(" (F)\n");
-	else
-		(flag_verbose) && printf("\n");
-	}
+int nfa_init(char *run_input_string) {	
+	nfa_run(run_input_string, state_start);
 
 	// ACCEPTED OR REJECTED?
-	if (state->final == 1) {
+//	if (nfa_run(run_input_string) == 1) {
+	if (accepted == 1) {
 		(flag_verbose) && printf("(ACCEPTED):\n\t==>%s\n", input_string);
 		if (flag_verbose && !output_accept_file) print_date();
 	
@@ -215,8 +291,10 @@ int dfa_run()
 		return 0;
 
 	//} else if (state->final == 0) {
+	
+	//} else if (rejected == 1) {
 	} else {
-		(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", input_string);
+		(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", run_input_string);
 		
 		// Delay output on reject?
 		if (flag_verbose && sleep_reject_msec >=0) {
@@ -325,10 +403,10 @@ int main (int argc, char **argv)
 		strip_extra_spaces(line);
 		
 		int d_start, d_final;
-		char d_name[STATE_NAME_MAX], d_zero[STATE_NAME_MAX], d_one[STATE_NAME_MAX];
-		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s",
-					d_name, &d_start, &d_final, d_zero, d_one);
-		if (scanned == 5) {
+		char d_name[STATE_NAME_MAX], d_zero[STATE_NAME_MAX], d_one[STATE_NAME_MAX],d_empty[STATE_NAME_MAX];
+		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s EMPTY %s",
+					d_name, &d_start, &d_final, d_zero, d_one, d_empty);
+		if (scanned == 6) {
 			num_states=num_states+1;
 		/* // Machinefile parser debugging
 		} else if (scanned == -1 && is_empty(line)) {
@@ -350,8 +428,9 @@ int main (int argc, char **argv)
 	// PARSE STATES FROM MACHINE FILE INTO ARRAYS
 	char s_name[num_states][STATE_NAME_MAX], 
 		 s_zero[num_states][STATE_NAME_MAX], 
-		 s_one[num_states][STATE_NAME_MAX];
-	int s_start[num_states], s_final[num_states];
+		 s_one[num_states][STATE_NAME_MAX],
+		 s_empty[num_states][STATE_NAME_MAX];
+	int s_start[num_states], s_final[num_states], s_zero_indexes[num_states], s_one_indexes[num_states];
 
 	char state_strings[num_states];
 	line = NULL;
@@ -361,13 +440,14 @@ int main (int argc, char **argv)
 	while( getline(&line, &linelen, machine_fp) > 0 ) {
 		num_lines++;
 		strip_extra_spaces(line);
-		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s",
+		scanned = sscanf(line, "NAME %s START %d FINAL %d ZERO %s ONE %s EMPTY %s",
 					s_name[i], 
 					&s_start[i], 
 					&s_final[i], 
 					s_zero[i], 
-					s_one[i]);
-		if (scanned == 5 ) {
+					s_one[i],
+					s_empty[i]);
+		if (scanned == 6) {
 			i=i+1;
 		// Allow blank and commented (#) lines
 		} else if ( !(scanned == -1 && is_empty(line)) && !(scanned == 0 && line[0] == '#')) {
@@ -426,20 +506,55 @@ int main (int argc, char **argv)
 		if (new_state->start) state_start = new_state;
 	}
 
-	// FILL STATES ARRAY WITH TRANSITIONS
+	// FILL STATE ARRAY WITH TRANSITIONS
 	for (i = 0; i < num_states; i++) {
 		char *state_zero = s_zero[i];
 		char *state_one = s_one[i];
-		int j;
-		for (j = 0; strcmp(state_zero, states[j]->name); j++);
-		states[i]->zero = states[j];
-		for (j = 0; strcmp(state_one, states[j]->name); j++);
-		states[i]->one = states[j];
+		char *state_empty = s_empty[i];
 		
+		if (strcasecmp(state_zero, "x") != 0) {
+			char *single_zero;
+			single_zero = strtok(state_zero, ",");
+			while(single_zero != NULL) {
+				//printf("zero_state: %s\n", single_zero);
+				int j;
+				for (j=0; strcmp(single_zero, states[j]->name); j++);
+				State_transition_add(0, states[i], states[j]);
+
+				single_zero = strtok(NULL, ",");
+			}
+		}
+
+		if (strcasecmp(state_one, "x") != 0) {
+			char *single_one;
+			single_one = strtok(state_one, ",");
+			while(single_one != NULL) {
+				//printf("one_state: %s\n", single_one);
+				int j;
+				for (j=0; strcmp(single_one, states[j]->name); j++);
+				State_transition_add(1, states[i], states[j]);
+
+				single_one = strtok(NULL, ",");
+			}
+		}
+
+		if (strcasecmp(state_empty, "x") != 0) {
+			char *single_empty;
+			single_empty = strtok(state_empty, ",");
+			while(single_empty != NULL) {
+				//printf("empty_state: %s\n", single_empty);
+				int j;
+				for (j=0; strcmp(single_empty, states[j]->name); j++);
+				State_transition_add(2, states[i], states[j]);
+
+				single_empty = strtok(NULL, ",");
+			}
+		}
+
 		if (flag_verbose) State_print(states[i]);
+
 	}
 
-	
 	if (input_string_file && !input_string)
 	{
 		// READ INPUT STRING(S) FROM FILE
@@ -463,8 +578,8 @@ int main (int argc, char **argv)
 				char *input_ascii = string_to_bin(input_string);
 				input_string = input_ascii;
 			}
-			state=state_start;
-			dfa_run();
+			state = state_start;
+			nfa_init(input_string);
 			
 			/*
 			signal(SIGINT, int_handler);
@@ -482,8 +597,8 @@ int main (int argc, char **argv)
 			char *input_ascii = string_to_bin(input_string);
 			input_string = input_ascii;
 		}
-		state=state_start;
-		dfa_run();
+		state = state_start;
+		nfa_init(input_string);
 	}
 
 	States_destroy(states, num_states);

@@ -165,7 +165,7 @@ char *output_accept_file = NULL;
 int dfa_run()
 {
 	// SET START STATE
-	//state=state_start;
+	state=state_start;
 
 	// RUN MACHINE
 	for (int i = 0; input_string[i] != '\0'; i++) {
@@ -463,7 +463,6 @@ int main (int argc, char **argv)
 				char *input_ascii = string_to_bin(input_string);
 				input_string = input_ascii;
 			}
-			state=state_start;
 			dfa_run();
 			
 			/*
@@ -482,7 +481,6 @@ int main (int argc, char **argv)
 			char *input_ascii = string_to_bin(input_string);
 			input_string = input_ascii;
 		}
-		state=state_start;
 		dfa_run();
 	}
 
