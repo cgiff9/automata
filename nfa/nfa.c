@@ -287,25 +287,20 @@ int nfa_init(char *run_input_string) {
 				sleep_accept_msec = SLEEP_ACCEPT_MSEC;
 			nsleep(sleep_accept_msec);
 		}
-		//free(input_string);
 		return 0;
 
-		//} else if (state->final == 0) {
+	} else {
+		(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", run_input_string);
 
-		//} else if (rejected == 1) {
-} else {
-	(flag_verbose) && printf("(REJECTED):\n\t==>%s\n", run_input_string);
-
-	// Delay output on reject?
-	if (flag_verbose && sleep_reject_msec >=0) {
-		if (sleep_reject_msec == 0)
-			sleep_reject_msec = SLEEP_REJECT_MSEC;
-		nsleep(sleep_reject_msec);
+		// Delay output on reject?
+		if (flag_verbose && sleep_reject_msec >=0) {
+			if (sleep_reject_msec == 0)
+				sleep_reject_msec = SLEEP_REJECT_MSEC;
+			nsleep(sleep_reject_msec);
+		}
+	
+		return 1;
 	}
-	//free(input_string);
-	return 1;
-}
-
 }
 
 int main (int argc, char **argv)

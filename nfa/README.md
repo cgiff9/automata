@@ -55,13 +55,13 @@ The input string can be supplied directly as a
 command line argument as shown below:
 ```
 $./nfa <machine file> <input string>
-$./nfa auto_EndsTwoOnes.txt 10001011
+$./nfa auto_endsTwoOnes.txt 10001011
 ```
 The input string can also be supplied in a file containing
 one input string per line.
 ```
 $./nfa <machine file> -f <input string file>
-$./nfa auto_EndsTwoOnes.txt -f input_test_string.txt
+$./nfa auto_endsTwoOnes.txt -f input_test_string.txt
 ```
 Not that if an input string is supplied via the command-line 
 while also invoking the '-f' option, then the '-f'option 
@@ -78,7 +78,9 @@ The supplied machine file must follow a specific
 format. For instance, the file "auto_endsTwoOnes.txt"
 contains:
 ```
-NAME q0 START 1 FINAL 0 ZERO q0 ONE q0,q1 EMPTY x                                                                NAME q1 START 0 FINAL 0 ZERO x ONE q2 EMPTY x                                                                    NAME q2 START 0 FINAL 1 ZERO x ONE x EMPTY x 
+NAME q0 START 1 FINAL 0 ZERO q0 ONE q0,q1 EMPTY x
+NAME q1 START 0 FINAL 0 ZERO x ONE q2 EMPTY x
+NAME q2 START 0 FINAL 1 ZERO x ONE x EMPTY x 
 ```
 Each line corresponds to a distinct state which
 contains the following information:
@@ -97,7 +99,7 @@ first line tells us that there is a state named "q0",
 which is the START state, but is not the FINAL state:
 
 If "q0" reads a '0', it goes to "q0". <br />
-If "q0" reads a '1', it goes to either "q0" or q1.
+If "q0" reads a '1', it goes to either "q0" or "q1".
 
 The second line tells us that there is a state named
 "q1":
@@ -107,9 +109,10 @@ If "q1" reads a '1', it goes to "q2".
 
 The third state contains no transitions. An 'x' or an
 'X' must be used to indicate that no transition
-exists for the particular character.
+exists for the particular character. The EMPTY string
+indicates a transition when no character is read.
 
-Multiple state names can be indicated by separting
+Multiple state names can be indicated by separating
 them with commas with no spaces between.
 
 Take care not to use the same name for two
@@ -192,10 +195,10 @@ First, the machine file itself is printed.
 Second, the transitions made during the machine run
 are output line-by-line. The "(F)" indicates that the 
 latest transition has landed on a FINAL state. The output
-reflected the current character being read in brackets
+reflects the current character being read in brackets
 followed by the remaining characters to be read. So long
-as the final character leads to a FINAL state, the string
-will be accepted.
+as the final character being read leads to a FINAL state, 
+the string will be accepted.
 
 Optional delay parameters can be used to pause the
 output on an accepted state and/or a rejected state.
